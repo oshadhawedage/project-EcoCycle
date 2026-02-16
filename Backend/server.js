@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import ewasteRoutes from "./routes/EwasteRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -32,6 +33,9 @@ app.use((err, req, res, next) => {
 
 // Port
 const PORT = process.env.PORT || 5000;
+
+// Routes
+app.use("/api/ewaste", ewasteRoutes);
 
 // Start server
 app.listen(PORT, () => {
