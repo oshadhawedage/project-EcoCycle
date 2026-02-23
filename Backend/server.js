@@ -4,6 +4,10 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import ewasteRoutes from "./routes/EwasteRoutes.js";
 import pickupRoutes from "./routes/pickupRequestRoutes.js";
+import impactLogRoutes from "./routes/impactLogRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
+
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +42,10 @@ const PORT = process.env.PORT || 5000;
 // Routes
 app.use("/api/ewaste", ewasteRoutes);
 app.use("/api/pickups", pickupRoutes);
+app.use("/api/impact-logs", impactLogRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/settings", settingsRoutes);
+
 
 // Start server
 app.listen(PORT, () => {
