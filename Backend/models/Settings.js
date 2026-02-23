@@ -2,8 +2,13 @@ import mongoose from "mongoose";
 
 const settingsSchema = new mongoose.Schema(
   {
+    // CO2 saved = weightKg * co2FactorPerKg
     co2FactorPerKg: { type: Number, default: 3 },
+
+    // monthly progress % = thisMonthWeightKg / monthlyTargetKg * 100
     monthlyTargetKg: { type: Number, default: 50 },
+
+    // if weightKg not provided, we use this default weight
     defaultWeightByCategory: {
       type: Map,
       of: Number,
@@ -18,5 +23,4 @@ const settingsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Settings = mongoose.model("Settings", settingsSchema);
-export default Settings;
+export default mongoose.model("Settings", settingsSchema);
