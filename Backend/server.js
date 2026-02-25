@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";       //megha   
 import connectDB from "./config/db.js";
+
 import ewasteRoutes from "./routes/EwasteRoutes.js";
 import pickupRoutes from "./routes/pickupRequestRoutes.js";
 import impactLogRoutes from "./routes/impactLogRoutes.js";
@@ -10,7 +11,9 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 
 import usersRoutes from "./routes/users.js";        //megha 
+import adminRoutes from "./routes/admin.js";        //megha
 import { notFound, errorHandler } from "./middleware/error.middleware.js";  //megha
+
 
 
 
@@ -66,6 +69,7 @@ app.use("/api/impact-logs", impactLogRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/users", usersRoutes);           //megha
+app.use("/api/admin", adminRoutes);           //megha
 
 // 404 handler
 app.use(notFound);                          //megha
