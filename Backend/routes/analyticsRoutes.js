@@ -6,11 +6,13 @@ import {
   getLeaderboard,
 } from "../controllers/analyticsController.js";
 
+import { protect } from "../middleware/auth.middleware.js";
+
 const router = express.Router();
 
-router.get("/overview", getOverview);
-router.get("/monthly-trend", getMonthlyTrend);
-router.get("/category-distribution", getCategoryDistribution);
-router.get("/leaderboard", getLeaderboard);
+router.get("/overview", protect, getOverview);
+router.get("/monthly-trend", protect, getMonthlyTrend);
+router.get("/category-distribution", protect, getCategoryDistribution);
+router.get("/leaderboard", protect, getLeaderboard);
 
 export default router;

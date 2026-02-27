@@ -24,8 +24,11 @@ export const getOverview = async (req, res) => {
   try {
     const settings = await getOrCreateSettings();
 
-    // Totals grouped by actionType
+    const isAdmin = req.user.role === "admin";
+    const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
+
     const totalsByAction = await ImpactLog.aggregate([
+      { $match: matchStage },
       {
         $group: {
           _id: "$actionType",
@@ -54,19 +57,17 @@ export const getOverview = async (req, res) => {
     const reuseRatePercent = totalWeightKg ? (reusedWeightKg / totalWeightKg) * 100 : 0;
     const recycleRatePercent = totalWeightKg ? (recycleWeightKg / totalWeightKg) * 100 : 0;
 
-    // Hazardous count
     const hazCountAgg = await ImpactLog.aggregate([
-      { $match: { category: { $in: hazardousCategories } } },
+      { $match: { ...matchStage, category: { $in: hazardousCategories } } },
       { $group: { _id: null, count: { $sum: 1 } } },
     ]);
     const hazardousCount = hazCountAgg[0]?.count || 0;
 
-    // Monthly progress
     const from = startOfMonth();
     const to = startOfNextMonth();
 
     const monthAgg = await ImpactLog.aggregate([
-      { $match: { createdAt: { $gte: from, $lt: to } } },
+      { $match: { ...matchStage, createdAt: { $gte: from, $lt: to } } },
       { $group: { _id: null, weightKg: { $sum: "$weightKg" } } },
     ]);
     const thisMonthWeightKg = monthAgg[0]?.weightKg || 0;
@@ -74,7 +75,7 @@ export const getOverview = async (req, res) => {
     const monthlyTargetKg = settings.monthlyTargetKg || 0;
     const progressPercent = monthlyTargetKg ? (thisMonthWeightKg / monthlyTargetKg) * 100 : 0;
 
-    const recentLogs = await ImpactLog.find().sort({ createdAt: -1 }).limit(10);
+    const recentLogs = await ImpactLog.find(matchStage).sort({ createdAt: -1 }).limit(10);
 
     return res.status(200).json({
       totalWeightKg,
@@ -99,12 +100,15 @@ export const getMonthlyTrend = async (req, res) => {
   try {
     const months = Math.max(1, Math.min(Number(req.query.months || 6), 24));
 
+    const isAdmin = req.user.role === "admin";
+    const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
+
     const end = startOfNextMonth();
     const start = new Date(end);
     start.setMonth(start.getMonth() - months);
 
     const data = await ImpactLog.aggregate([
-      { $match: { createdAt: { $gte: start, $lt: end } } },
+      { $match: { ...matchStage, createdAt: { $gte: start, $lt: end } } },
       {
         $group: {
           _id: { y: { $year: "$createdAt" }, m: { $month: "$createdAt" } },
@@ -132,7 +136,11 @@ export const getMonthlyTrend = async (req, res) => {
 // GET /api/analytics/category-distribution
 export const getCategoryDistribution = async (req, res) => {
   try {
+    const isAdmin = req.user.role === "admin";
+    const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
+
     const data = await ImpactLog.aggregate([
+      { $match: matchStage },
       { $group: { _id: "$category", count: { $sum: 1 }, weightKg: { $sum: "$weightKg" } } },
       { $sort: { weightKg: -1 } },
     ]);
@@ -152,6 +160,11 @@ export const getCategoryDistribution = async (req, res) => {
 // GET /api/analytics/leaderboard?limit=10
 export const getLeaderboard = async (req, res) => {
   try {
+    const isAdmin = req.user.role === "admin";
+    if (!isAdmin) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
     const limit = Math.max(1, Math.min(Number(req.query.limit || 10), 50));
 
     const data = await ImpactLog.aggregate([
