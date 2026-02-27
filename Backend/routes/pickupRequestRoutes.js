@@ -7,30 +7,27 @@ import {
   getRequestById,
   updateStatus,
   deleteRequest,
-  acceptRequest
+  acceptRequest,
 } from "../controllers/pickupRequestController.js";
 
-import { authMock, allowRoles } from "../middleware/authMock.js";
+import { protect, authorizeRoles } from "../middleware/auth.middleware.js";
 
-// All routes protected (mock)
-router.use(authMock);
+// Customer creates pickup request (after clicking "Recycle")
+router.post("/", protect, authorizeRoles("USER"), createRequest);
 
-// Customer creates request after clicking "Recycle"
-router.post("/", allowRoles("customer"), createRequest);
+// Recycler/Admin view all pickup requests
+router.get("/", protect, authorizeRoles("RECYCLER", "ADMIN"), getAllRequests);
 
-// Recycler/Admin can view all requests
-router.get("/", allowRoles("recycler", "admin"), getAllRequests);
+// Recycler/Admin view request details
+router.get("/:id", protect, authorizeRoles("RECYCLER", "ADMIN"), getRequestById);
 
-// Recycler/Admin can view request details
-router.get("/:id", allowRoles("recycler", "admin"), getRequestById);
+// Recycler accepts a pickup request (updates status + sends email)
+router.put("/:id/accept", protect, authorizeRoles("RECYCLER"), acceptRequest);
 
-// Recycler accepts request (this is your key workflow)
-router.put("/:id/accept", allowRoles("recycler"), acceptRequest);
+// Admin/Recycler updates status (Collected / Completed etc.)
+router.put("/:id/status", protect, authorizeRoles("ADMIN", "RECYCLER"), updateStatus);
 
-// Admin (optional) updates status later (Collected/Completed)
-router.put("/:id/status", allowRoles("admin", "recycler"), updateStatus);
-
-// Admin can delete (optional)
-router.delete("/:id", allowRoles("admin"), deleteRequest);
+// Admin deletes pickup request
+router.delete("/:id", protect, authorizeRoles("ADMIN"), deleteRequest);
 
 export default router;
