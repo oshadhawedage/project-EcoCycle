@@ -3,7 +3,6 @@ import Settings from "../models/Settings.js";
 
 const allowedActions = ["RECYCLE", "DONATE", "SELL"];
 
-// Helper: always have one settings document
 const getOrCreateSettings = async () => {
   let settings = await Settings.findOne();
   if (!settings) settings = await Settings.create({});
@@ -13,13 +12,15 @@ const getOrCreateSettings = async () => {
 // POST /api/impact-logs
 export const createImpactLog = async (req, res) => {
   try {
-    const { userId, userName, actionType, category } = req.body;
+    const { actionType, category } = req.body;
     let { weightKg } = req.body;
 
-    // 1) Basic validation
-    if (!userId || !userName || !actionType || !category) {
+    const userId = req.user._id.toString();
+    const userName = req.user.name || req.user.fullName || req.user.email || "User";
+
+    if (!actionType || !category) {
       return res.status(400).json({
-        message: "userId, userName, actionType, category are required",
+        message: "actionType and category are required",
       });
     }
 
@@ -29,20 +30,16 @@ export const createImpactLog = async (req, res) => {
       });
     }
 
-    // 2) Load settings
     const settings = await getOrCreateSettings();
 
-    // 3) If weight not provided, use default weight by category
     if (weightKg === undefined || Number(weightKg) <= 0) {
       const defaultW = settings.defaultWeightByCategory?.get?.(category);
-      weightKg = defaultW ?? 0.5; // fallback default
+      weightKg = defaultW ?? 0.5;
     }
 
-    // 4) Calculate CO2
     const factor = settings.co2FactorPerKg ?? 3;
     const co2SavedKg = Number(weightKg) * factor;
 
-    // 5) Create log (NO duplicate blocking now — as you requested earlier)
     const created = await ImpactLog.create({
       userId,
       userName,
@@ -63,21 +60,25 @@ export const getImpactLogs = async (req, res) => {
   try {
     const { userId, actionType, category } = req.query;
 
-    // ✅ This is the correct filter logic
     const filter = {};
-    if (userId) filter.userId = userId;
+
     if (actionType) filter.actionType = actionType;
     if (category) filter.category = category;
 
-    const logs = await ImpactLog.find(filter).sort({ createdAt: -1 });
+    if (req.user.role === "admin") {
+      if (userId) filter.userId = userId;
+    } else {
+      filter.userId = req.user._id.toString();
+    }
 
+    const logs = await ImpactLog.find(filter).sort({ createdAt: -1 });
     return res.status(200).json(logs);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
 };
 
-// PUT /api/impact-logs/:id
+// PUT /api/impact-logs/:id (admin only by route)
 export const updateImpactLog = async (req, res) => {
   try {
     const { weightKg } = req.body;
@@ -106,7 +107,7 @@ export const updateImpactLog = async (req, res) => {
   }
 };
 
-// DELETE /api/impact-logs/:id
+// DELETE /api/impact-logs/:id (admin only by route)
 export const deleteImpactLog = async (req, res) => {
   try {
     const deleted = await ImpactLog.findByIdAndDelete(req.params.id);
