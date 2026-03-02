@@ -3,14 +3,8 @@ import EwasteItem from "../models/EwasteItem.js";
 // Create new e-waste item
 export const createEwasteItem = async (req, res) => {
 
-  console.log("Mock user:", req.user);
+  
   try {
-    // 🔐 Role check
-    if (req.user.role !== "user") {
-      return res.status(403).json({
-        message: "Only users can create e-waste items",
-      });
-    }
 
     const { deviceType, brand, condition, age, weight, disposalType } = req.body;
 
@@ -56,23 +50,15 @@ export const getEwasteItems = async (req, res) => {
     let query = {};
 
     // 🔐 Role-based filtering
-    if (req.user.role === "user") {
+    if (req.user.role === "USER") {
       query.owner = req.user._id;
     }
 
-    else if (req.user.role === "recycler") {
+    else if (req.user.role === "RECYCLER") {
       query.status = "available";
     }
 
-    else if (req.user.role === "admin") {
-      // admin sees everything
-    }
-
-    else {
-      return res.status(403).json({
-        message: "Invalid role",
-      });
-    }
+    
 
     // 🔎 Optional filter
     if (deviceType) {
@@ -117,33 +103,18 @@ export const getEwasteItemById = async (req, res) => {
       });
     }
 
-    // 🔐 Role-based access control
-
-    // 👤 User → only own item
-    if (req.user.role === "user") {
-      if (item.owner.toString() !== req.user._id.toString()) {
-        return res.status(403).json({
-          message: "Not authorized to view this item",
-        });
-      }
+    // Ownership rule for USER
+    if (req.user.role === "USER" &&
+        item.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to view this item" });
     }
 
-    // ♻ Recycler → only available items
-    else if (req.user.role === "recycler") {
-      if (item.status !== "available") {
-        return res.status(403).json({
-          message: "Recycler can only view available items",
-        });
-      }
+    // Recycler rule
+    if (req.user.role === "RECYCLER" &&
+        item.status !== "available") {
+      return res.status(403).json({ message: "Recycler can only view available items" });
     }
 
-    // 👑 Admin → full access (no restriction)
-
-    else if (req.user.role !== "admin") {
-      return res.status(403).json({
-        message: "Invalid role",
-      });
-    }
 
     res.status(200).json(item);
 
@@ -162,14 +133,14 @@ export const updateEwasteItem = async (req, res) => {
     if (!item) return res.status(404).json({ message: "Item not found" });
 
     // 👑 Admin → full access
-    if (req.user.role === "admin") {
+    if (req.user.role === "ADMIN") {
       Object.assign(item, req.body);
       const updatedItem = await item.save();
       return res.status(200).json(updatedItem);
     }
 
     // 👤 User → only own items
-    if (req.user.role === "user") {
+    if (req.user.role === "USER") {
       if (item.owner.toString() !== req.user._id.toString()) {
         return res.status(403).json({ message: "Not authorized" });
       }
@@ -186,7 +157,7 @@ export const updateEwasteItem = async (req, res) => {
     }
 
     // ♻ Recycler → can only update status to picked-up
-    if (req.user.role === "recycler") {
+    if (req.user.role === "RECYCLER") {
       if (req.body.status !== "picked-up") {
         return res.status(403).json({ message: "Recycler can only mark items as picked-up" });
       }
@@ -196,8 +167,6 @@ export const updateEwasteItem = async (req, res) => {
       return res.status(200).json(updatedItem);
     }
 
-    // Invalid role
-    return res.status(403).json({ message: "Invalid role" });
 
   } catch (error) {
     res.status(500).json({ message: "Server error while updating item", error: error.message });
@@ -213,13 +182,13 @@ export const deleteEwasteItem = async (req, res) => {
     if (!item) return res.status(404).json({ message: "Item not found" });
 
     // 👑 Admin → can delete any item
-    if (req.user.role === "admin") {
+    if (req.user.role === "ADMIN") {
       await item.deleteOne();
       return res.status(200).json({ message: "Item deleted successfully by admin" });
     }
 
     // 👤 User → can delete own items only
-    if (req.user.role === "user") {
+    if (req.user.role === "USER") {
       if (item.owner.toString() !== req.user._id.toString()) {
         return res.status(403).json({ message: "Not authorized to delete this item" });
       }
@@ -228,13 +197,9 @@ export const deleteEwasteItem = async (req, res) => {
       return res.status(200).json({ message: "Item deleted successfully" });
     }
 
-    // ♻ Recycler → cannot delete
-    if (req.user.role === "recycler") {
-      return res.status(403).json({ message: "Recycler cannot delete items" });
-    }
+    // RECYCLER → no delete
+    return res.status(403).json({ message: "Recycler cannot delete items" });
 
-    // Invalid role
-    return res.status(403).json({ message: "Invalid role" });
 
   } catch (error) {
     res.status(500).json({

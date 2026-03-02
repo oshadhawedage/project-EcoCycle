@@ -7,19 +7,20 @@ import {
   deleteEwasteItem,
 } from "../controllers/EwasteController.js";
 
-//import { protect } from "../middlewares/authMiddleware.js";
-import { mockUser } from "../middleware/mockUser.js";
+import { protect, authorizeRoles } from "../middleware/auth.middleware.js";
+
+//import { mockUser } from "../middleware/mockUser.js";
 
 const router = express.Router();
 
 // All routes protected
 router.route("/")
-  .post(mockUser, createEwasteItem)
-  .get(mockUser, getEwasteItems);
+  .post(protect, authorizeRoles("USER"),createEwasteItem)
+  .get(protect, authorizeRoles("USER", "RECYCLER", "ADMIN"),getEwasteItems);
 
 router.route("/:id")
-  .get(mockUser, getEwasteItemById)
-  .put(mockUser, updateEwasteItem)
-  .delete(mockUser, deleteEwasteItem);
+  .get(protect, authorizeRoles("USER", "RECYCLER", "ADMIN"),getEwasteItemById)
+  .put(protect, authorizeRoles("USER", "RECYCLER", "ADMIN"), updateEwasteItem)
+  .delete(protect, authorizeRoles("USER", "ADMIN"), deleteEwasteItem);
 
 export default router;
