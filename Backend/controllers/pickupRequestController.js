@@ -1,28 +1,32 @@
 import PickupRequest from "../models/pickupRequestModel.js";
 import { sendStatusEmail } from "../services/emailService.js";
+import EwasteItem from "../models/EwasteItem.js";
 
 // CREATE request (Customer)
 export const createRequest = async (req, res) => {
   try {
-    const { userId, email, itemName, quantity, address, preferredDate, ewasteItemId } = req.body;
+    const { ewasteItemId, quantity, address, preferredDate } = req.body;
 
-    // basic validation
-    if (!userId || !email || !itemName || !quantity || !address || !preferredDate) {
+    const userId = req.user._id;
+    const email = req.user.email;
+
+    if (!ewasteItemId || !quantity || !address || !preferredDate) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (quantity < 1) {
-      return res.status(400).json({ message: "Quantity must be at least 1" });
-    }
+    // 🔹 Get ewaste item from DB
+    const item = await EwasteItem.findById(ewasteItemId);
+    if (!item) return res.status(404).json({ message: "E-waste item not found" });
 
+    // create pickup request using item details automatically
     const request = await PickupRequest.create({
       userId,
       email,
-      itemName,
+      ewasteItemId,
+      itemName: `${item.brand} ${item.deviceType}`, // auto item name
       quantity,
       address,
       preferredDate,
-      ewasteItemId: ewasteItemId || null,
       status: "Pending",
     });
 
@@ -56,23 +60,21 @@ export const getRequestById = async (req, res) => {
 // Recycler ACCEPT request (Recycler)
 export const acceptRequest = async (req, res) => {
   try {
-    const recyclerId = req.user._id; // from JWT protect middleware
+    const recyclerId = req.user._id;
 
     const request = await PickupRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: "Not found" });
 
-    // prevent multiple recyclers accepting same request
     if (request.recyclerId) {
       return res.status(400).json({ message: "Request already accepted" });
     }
 
     request.recyclerId = recyclerId;
-    request.status = "Approved";
+    request.status = "Accepted"; // ✅ FIXED
     request.acceptedAt = new Date();
 
     const updated = await request.save();
 
-    // Send email to customer when accepted
     await sendStatusEmail({
       to: updated.email,
       itemName: updated.itemName,
@@ -81,7 +83,6 @@ export const acceptRequest = async (req, res) => {
 
     return res.json(updated);
   } catch (error) {
-    console.log("acceptRequest error:", error.message);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -113,6 +114,22 @@ export const updateStatus = async (req, res) => {
     return res.json(updated);
   } catch (error) {
     console.log("updateStatus error:", error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// GET accepted requests (Recycler)
+export const getAcceptedRequests = async (req, res) => {
+  try {
+    const recyclerId = req.user._id;
+
+    const requests = await PickupRequest.find({
+      recyclerId,
+      status: "Accepted",
+    }).sort({ acceptedAt: -1 });
+
+    return res.json(requests);
+  } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };

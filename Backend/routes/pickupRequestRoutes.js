@@ -8,6 +8,7 @@ import {
   updateStatus,
   deleteRequest,
   acceptRequest,
+  getAcceptedRequests,
 } from "../controllers/pickupRequestController.js";
 
 import { protect, authorizeRoles } from "../middleware/auth.middleware.js";
@@ -26,6 +27,9 @@ router.put("/:id/accept", protect, authorizeRoles("RECYCLER"), acceptRequest);
 
 // Admin/Recycler updates status (Collected / Completed etc.)
 router.put("/:id/status", protect, authorizeRoles("ADMIN", "RECYCLER"), updateStatus);
+
+// Recycler accepted pickup requests (Dashboard -> Accepted Requests)
+router.get("/accepted/my", protect, authorizeRoles("RECYCLER"), getAcceptedRequests);
 
 // Admin deletes pickup request
 router.delete("/:id", protect, authorizeRoles("ADMIN"), deleteRequest);
