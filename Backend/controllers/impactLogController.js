@@ -16,7 +16,7 @@ export const createImpactLog = async (req, res) => {
     let { weightKg } = req.body;
 
     const userId = req.user._id.toString();
-    const userName = req.user.name || req.user.fullName || req.user.email || "User";
+    const userName = req.user.name || req.user.fullName || req.user.email || "USER";
 
     if (!actionType || !category) {
       return res.status(400).json({
@@ -65,7 +65,7 @@ export const getImpactLogs = async (req, res) => {
     if (actionType) filter.actionType = actionType;
     if (category) filter.category = category;
 
-    if (req.user.role === "admin") {
+    if (req.user.role === "ADMIN") {
       if (userId) filter.userId = userId;
     } else {
       filter.userId = req.user._id.toString();
