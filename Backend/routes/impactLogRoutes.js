@@ -17,7 +17,7 @@ router.post("/", protect, createImpactLog);
 router.get("/", protect, getImpactLogs);
 
 // Admin only (keep your current rule)
-router.put("/:id", protect, authorizeRoles("admin"), updateImpactLog);
-router.delete("/:id", protect, authorizeRoles("admin"), deleteImpactLog);
+router.put("/:id", protect, authorizeRoles("ADMIN"), updateImpactLog);
+router.delete("/:id", protect, authorizeRoles("ADMIN"), deleteImpactLog);
 
 export default router;

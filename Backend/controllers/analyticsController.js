@@ -24,7 +24,7 @@ export const getOverview = async (req, res) => {
   try {
     const settings = await getOrCreateSettings();
 
-    const isAdmin = req.user.role === "admin";
+    const isAdmin = req.user.role === "ADMIN";
     const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
 
     const totalsByAction = await ImpactLog.aggregate([
@@ -100,7 +100,7 @@ export const getMonthlyTrend = async (req, res) => {
   try {
     const months = Math.max(1, Math.min(Number(req.query.months || 6), 24));
 
-    const isAdmin = req.user.role === "admin";
+    const isAdmin = req.user.role === "ADMIN";
     const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
 
     const end = startOfNextMonth();
@@ -136,7 +136,7 @@ export const getMonthlyTrend = async (req, res) => {
 // GET /api/analytics/category-distribution
 export const getCategoryDistribution = async (req, res) => {
   try {
-    const isAdmin = req.user.role === "admin";
+    const isAdmin = req.user.role === "ADMIN";
     const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
 
     const data = await ImpactLog.aggregate([
@@ -160,7 +160,7 @@ export const getCategoryDistribution = async (req, res) => {
 // GET /api/analytics/leaderboard?limit=10
 export const getLeaderboard = async (req, res) => {
   try {
-    const isAdmin = req.user.role === "admin";
+    const isAdmin = req.user.role === "ADMIN";
     if (!isAdmin) {
       return res.status(403).json({ message: "Access denied" });
     }
