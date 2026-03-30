@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 // Pickup Request Schema
 const pickupRequestSchema = new mongoose.Schema(
   {
-    // Customer/User id (string for now; later can be ObjectId ref User)
+    // Customer/User id who created the request (later can be ObjectId ref User)
     userId: {
       type: String,
       required: true,
@@ -20,7 +20,7 @@ const pickupRequestSchema = new mongoose.Schema(
     },
 
     // Related E-waste item id (from EwasteItem component)
-    // This connects your component with the E-waste item management component
+    // This connects pickupRequest component with the E-waste item management component
     ewasteItemId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "EwasteItem",
@@ -58,7 +58,7 @@ const pickupRequestSchema = new mongoose.Schema(
     // Pending -> Approved (accepted) -> Collected -> Completed
     status: {
       type: String,
-      enum: ["Pending", "Approved", "Collected", "Completed"],
+      enum: ["Pending", "Accepted", "Collected", "Completed"],
       default: "Pending",
     },
 
@@ -66,7 +66,7 @@ const pickupRequestSchema = new mongoose.Schema(
     recyclerId: {
       type: String, // later can be ObjectId ref User
       default: null,
-      trim: true,
+      trim: true, // use the trim to remove any leading/trailing whitespace from the recyclerId string
     },
 
     // Date/time when recycler accepted the request
@@ -76,7 +76,7 @@ const pickupRequestSchema = new mongoose.Schema(
     },
   },
   {
-    // Automatically adds createdAt and updatedAt
+    // This tells Mongoose to automatically add createdAt and updatedAt fields to the schema, which can be useful for tracking when pickup requests were created and last updated.
     timestamps: true,
   }
 );
