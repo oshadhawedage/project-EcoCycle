@@ -9,6 +9,9 @@ import AdminLayout from './components/layout/AdminLayout';
 import UserLayout from './components/layout/UserLayout';
 import RecyclerLayout from './components/layout/RecyclerLayout';
 
+import RecyclerPickupsPage from "./pages/pickups/RecyclerPickupsPage"; // recycler
+
+
 function App() {
   return (
     <Router>
@@ -28,6 +31,9 @@ function App() {
 
         <Route element={<RecyclerLayout />}>
           <Route path="/recycler" element={<div>Recycler Dashboard</div>} />
+          
+          {/* ✅ YOUR NEW PICKUP PAGE */}
+          <Route path="/pickups" element={<RecyclerPickupsPage />} />
         </Route>
 
       </Routes>

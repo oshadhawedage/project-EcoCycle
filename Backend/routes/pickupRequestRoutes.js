@@ -13,23 +13,23 @@ import {
 
 import { protect, authorizeRoles } from "../middleware/auth.middleware.js";
 
-// Customer creates pickup request (after clicking "Recycle")
+// Customer creates pickup request
 router.post("/", protect, authorizeRoles("USER"), createRequest);
 
 // Recycler/Admin view all pickup requests
 router.get("/", protect, authorizeRoles("RECYCLER", "ADMIN"), getAllRequests);
 
+// Recycler accepted pickup requests
+router.get("/accepted/my", protect, authorizeRoles("RECYCLER"), getAcceptedRequests);
+
 // Recycler/Admin view request details
 router.get("/:id", protect, authorizeRoles("RECYCLER", "ADMIN"), getRequestById);
 
-// Recycler accepts a pickup request (updates status + sends email)
-router.put("/:id/accept", protect, authorizeRoles("RECYCLER"), acceptRequest);
-
-// Admin/Recycler updates status (Collected / Completed etc.)
+// Admin/Recycler updates status
 router.put("/:id/status", protect, authorizeRoles("ADMIN", "RECYCLER"), updateStatus);
 
-// Recycler accepted pickup requests (Dashboard -> Accepted Requests)
-router.get("/accepted/my", protect, authorizeRoles("RECYCLER"), getAcceptedRequests);
+// Recycler accepts a pickup request
+router.put("/:id/accept", protect, authorizeRoles("RECYCLER"), acceptRequest);
 
 // Admin deletes pickup request
 router.delete("/:id", protect, authorizeRoles("ADMIN"), deleteRequest);
