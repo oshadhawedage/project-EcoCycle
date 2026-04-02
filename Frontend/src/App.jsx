@@ -31,9 +31,12 @@ function App() {
 
         <Route element={<RecyclerLayout />}>
           <Route path="/recycler" element={<div>Recycler Dashboard</div>} />
-          
-          {/* ✅ YOUR NEW PICKUP PAGE */}
+
+          {/* All pickup requests */}
           <Route path="/pickups" element={<RecyclerPickupsPage />} />
+
+          {/* Accepted pickup requests */}
+          <Route path="/pickups/accepted" element={<RecyclerPickupsPage mode="accepted" />}/>
         </Route>
 
       </Routes>
