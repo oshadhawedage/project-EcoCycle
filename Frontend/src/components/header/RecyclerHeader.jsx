@@ -9,11 +9,12 @@ const RecyclerHeader = () => {
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { name: 'Dashboard', path: '/recycler' },
-    { name: 'Pickups', path: '/pickups' },
-    { name: 'Processing', path: '/processing' },
-    { name: 'Reports', path: '/recycler-reports' },
-  ];
+  { name: 'Dashboard', path: '/recycler' },
+  { name: 'All Requests', path: '/pickups' },
+  { name: 'Accepted', path: '/pickups/accepted' },
+  { name: 'Processing', path: '/processing' },
+  { name: 'Reports', path: '/recycler-reports' },
+];
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f55a7] from-50% to-[#4db848] shadow-md">

@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  ClipboardList,
-  CircleCheckBig,
-  RefreshCw,
-  Search,
-} from "lucide-react";
+import { Search } from "lucide-react";
 import PickupRequestCard from "../../components/pickup/PickupRequestCard";
 import PickupRequestDetails from "../../components/pickup/PickupRequestDetails";
 import {
@@ -14,9 +9,17 @@ import {
   getPickupRequestById,
   updatePickupRequestStatus,
 } from "../../services/api";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const RecyclerPickupsPage = () => {
-  const [activeTab, setActiveTab] = useState("all");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const activeTabFromURL = location.pathname.includes("accepted")
+    ? "accepted"
+    : "all";
+
+  const [activeTab, setActiveTab] = useState(activeTabFromURL);
   const [requests, setRequests] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -26,19 +29,25 @@ const RecyclerPickupsPage = () => {
   const [accepting, setAccepting] = useState(false);
   const [updating, setUpdating] = useState(false);
 
+  useEffect(() => {
+    setActiveTab(activeTabFromURL);
+  }, [location.pathname, activeTabFromURL]);
+
   const fetchRequests = async () => {
     try {
       setLoadingList(true);
 
       const response =
-        activeTab === "all"
-          ? await getAllPickupRequests()
-          : await getAcceptedPickupRequests();
+        activeTab === "accepted"
+          ? await getAcceptedPickupRequests()
+          : await getAllPickupRequests();
 
       setRequests(response.data || []);
 
       if (response.data?.length > 0) {
-        const keepSelected = response.data.find((item) => item._id === selectedId);
+        const keepSelected = response.data.find(
+          (item) => item._id === selectedId
+        );
         const nextId = keepSelected ? selectedId : response.data[0]._id;
         setSelectedId(nextId);
       } else {
@@ -54,6 +63,7 @@ const RecyclerPickupsPage = () => {
 
   const fetchRequestDetails = async (id) => {
     if (!id) return;
+
     try {
       setLoadingDetails(true);
       const response = await getPickupRequestById(id);
@@ -91,9 +101,8 @@ const RecyclerPickupsPage = () => {
     try {
       setAccepting(true);
       await acceptPickupRequest(id);
-      await fetchRequests();
-      await fetchRequestDetails(id);
-      setActiveTab("accepted");
+
+      navigate("/pickups/accepted");
     } catch (error) {
       alert(error?.response?.data?.message || "Failed to accept request");
     } finally {
@@ -114,6 +123,14 @@ const RecyclerPickupsPage = () => {
     }
   };
 
+  const pageTitle =
+    activeTab === "accepted" ? "Accepted Pickup Requests" : "All Pickup Requests";
+
+  const pageDescription =
+    activeTab === "accepted"
+      ? "View and manage pickup requests accepted by the recycler."
+      : "View and manage all customer pickup requests.";
+
   return (
     <main className="flex-1 bg-[#f5f7fb]">
       <section className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white">
@@ -121,7 +138,9 @@ const RecyclerPickupsPage = () => {
           <p className="uppercase tracking-[0.25em] text-xs text-white/80 mb-3">
             Recycler Dashboard
           </p>
-          <h1 className="text-3xl md:text-5xl font-semibold mb-3">Pickup Requests</h1>
+          <h1 className="text-3xl md:text-5xl font-semibold mb-3">
+            Pickup Requests
+          </h1>
           <p className="text-white/90 max-w-2xl text-sm md:text-base">
             Manage all customer pickup requests, review request details, and track your
             accepted collections.
@@ -130,54 +149,21 @@ const RecyclerPickupsPage = () => {
       </section>
 
       <section className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 md:p-6 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setActiveTab("all")}
-                className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition ${
-                  activeTab === "all"
-                    ? "bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                <ClipboardList className="w-4 h-4" />
-                All Requests
-              </button>
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-800">{pageTitle}</h2>
+            <p className="text-sm text-slate-500 mt-1">{pageDescription}</p>
+          </div>
 
-              <button
-                onClick={() => setActiveTab("accepted")}
-                className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition ${
-                  activeTab === "accepted"
-                    ? "bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                <CircleCheckBig className="w-4 h-4" />
-                Accepted Requests
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="relative w-full lg:w-[320px]">
-                <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-                <input
-                  type="text"
-                  placeholder="Search requests..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#0f55a7]"
-                />
-              </div>
-
-              <button
-                onClick={fetchRequests}
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </button>
-            </div>
+          <div className="relative w-full lg:w-[320px]">
+            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+            <input
+              type="text"
+              placeholder="Search requests..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#0f55a7]"
+            />
           </div>
         </div>
 
