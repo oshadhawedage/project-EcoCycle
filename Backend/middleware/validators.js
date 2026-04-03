@@ -107,3 +107,42 @@ export const reviewRecyclerRequestValidation = [
   body("adminNote").optional().trim().isLength({ max: 300 }).withMessage("adminNote max 300 chars"),
   validate
 ];
+
+// ===== ADMIN AUTH VALIDATORS =====
+
+export const adminRegisterValidation = [
+  body("fullName").trim().isLength({ min: 2, max: 100 }).withMessage("fullName must be 2-100 chars"),
+  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+  body("adminKey").trim().notEmpty().withMessage("Admin key is required"),
+  validate
+];
+
+export const adminLoginValidation = [
+  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+  validate
+];
+
+export const adminForgotPasswordValidation = [
+  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
+  validate
+];
+
+export const adminResetPasswordValidation = [
+  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
+  body("otp").trim().isLength({ min: 4, max: 10 }).withMessage("OTP is required"),
+  body("newPassword").isLength({ min: 6 }).withMessage("New password must be at least 6 characters"),
+  validate
+];
+
+export const adminVerifyEmailOtpValidation = [
+  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
+  body("otp").trim().isLength({ min: 4, max: 10 }).withMessage("OTP is required"),
+  validate
+];
+
+export const adminResendOtpValidation = [
+  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
+  validate
+];
