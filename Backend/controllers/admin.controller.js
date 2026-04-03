@@ -477,12 +477,12 @@ export const adminLogin = async (req, res, next) => {
     res.json({
       message: "Admin login successful",
       token,
-      admin: {
+      user: {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-        permissions: user.adminDetails.permissions,
+        permissions: user.adminDetails?.permissions,
         lastLogin: user.lastLogin
       }
     });
