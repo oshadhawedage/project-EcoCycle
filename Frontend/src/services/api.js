@@ -1,14 +1,17 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5050/api', 
+  // Configure via Vite env var if needed, otherwise default to backend's typical dev port.
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
 });
 
-const DEV_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTE4OGQ0ZTI2NzUzYmY2YmJlN2I5ZiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3NTAzODQyNCwiZXhwIjoxNzc1NjQzMjI0fQ.Q5YECZE9FRdxAesu91PqDs3Janyu1iaqBAFtHMu7R9k";
+// Optional dev override (avoid hard-coding secrets in source): set `VITE_DEV_TOKEN` if you need one.
+const DEV_TOKEN = import.meta.env.VITE_DEV_TOKEN;
 
 export const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    return DEV_TOKEN || localStorage.getItem('token');
+    // Prefer the real token from login; fall back to optional dev token.
+    return localStorage.getItem('token') || DEV_TOKEN;
   }
   return DEV_TOKEN;
 };
@@ -20,17 +23,36 @@ export const setAuthToken = (token) => {
   }
 };
 
-// API.interceptors.request.use((req) => {
-//   // Don't add token to auth endpoints
-//   const authEndpoints = ['/users/register', '/users/login', '/users/verify-email', '/users/resend-otp', '/users/forgot-password', '/users/reset-password', '/admin/register', '/admin/login', '/admin/verify-email', '/admin/resend-otp', '/admin/forgot-password', '/admin/reset-password'];
-//   
-//   const isAuthEndpoint = authEndpoints.some(endpoint => req.url.includes(endpoint));
-//   if (!isAuthEndpoint) {
-//     const token = getAuthToken();
-//     if (token) req.headers.authorization = `Bearer ${token}`;
-//   }
-//   return req;
-// });
+API.interceptors.request.use((req) => {
+  // Don't add token to auth endpoints
+  const authEndpoints = [
+    '/users/register',
+    '/users/login',
+    '/users/verify-email',
+    '/users/resend-otp',
+    '/users/forgot-password',
+    '/users/reset-password',
+    '/admin/register',
+    '/admin/login',
+    '/admin/verify-email',
+    '/admin/resend-otp',
+    '/admin/forgot-password',
+    '/admin/reset-password',
+  ];
+
+  const url = req.url || '';
+  const isAuthEndpoint = authEndpoints.some((endpoint) => url.includes(endpoint));
+
+  if (!isAuthEndpoint) {
+    const token = getAuthToken();
+    if (token) {
+      req.headers = req.headers || {};
+      req.headers.authorization = `Bearer ${token}`;
+    }
+  }
+
+  return req;
+});
 
 // ================= USER AUTH APIs =================
 export const userRegister = (data) => API.post('/users/register', data);

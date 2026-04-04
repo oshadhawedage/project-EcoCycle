@@ -1,22 +1,60 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, User, Menu, X } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, Menu, X, LogOut, UserCircle } from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
+import API, { setAuthToken } from '../../services/api';
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const location = useLocation();
+  const profileMenuRef = useRef(null);
 
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { name: 'Dashboard', path: '/admin' },
+    { name: 'Dashboard', path: '/admin/dashboard' },
     { name: 'Records', path: '/admin/logs' }, 
     { name: 'Users', path: '/users' },
     { name: 'Reports', path: '/reports' },
     { name: 'Configuration', path: '/admin/settings' },
   ];
+
+  const currentUser = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || 'null');
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    const onDocMouseDown = (e) => {
+      if (!isProfileMenuOpen) return;
+      const node = profileMenuRef.current;
+      if (node && !node.contains(e.target)) setIsProfileMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [isProfileMenuOpen]);
+
+  const handleSignOut = async () => {
+    try {
+      await API.post('/admin/logout');
+    } catch {
+      // Ignore network/auth errors; still clear local session.
+    } finally {
+      setIsProfileMenuOpen(false);
+      setAuthToken(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('registeredEmail');
+      navigate('/admin/login');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f55a7] from-50% to-[#4db848] shadow-md">
@@ -26,7 +64,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-14 md:h-16">
 
           <div className="flex-1 flex justify-start">
-            <Link to="/admin" className="flex items-center space-x-2 group">
+            <Link to="/admin/dashboard" className="flex items-center space-x-2 group">
               <img 
                 src={myLogo} 
                 alt="EcoCycle Brand Logo" 
@@ -82,9 +120,50 @@ const Header = () => {
                 </button>
               </div>
 
-              <button className="p-1.5 text-white hover:scale-110 transition-transform duration-200">
-                <User className="w-5 h-5" strokeWidth={2.0} />
-              </button>
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileMenuOpen((v) => !v)}
+                  className="relative p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+                  aria-label="Open admin menu"
+                >
+                  {/* Glow ring (like chat icon) */}
+                  {!isProfileMenuOpen && (
+                    <>
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -inset-1.5 rounded-full bg-gradient-to-r from-sky-300/15 to-emerald-300/15 blur-sm opacity-70 animate-pulse -z-10"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -inset-1.5 rounded-full border border-white/25 opacity-50 animate-ping -z-10"
+                      />
+                    </>
+                  )}
+
+                  <UserCircle className="relative z-10 w-6 h-6" strokeWidth={2.0} />
+                </button>
+
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl border border-white/15 bg-slate-900/95 backdrop-blur shadow-xl overflow-hidden">
+                    <div className="px-4 py-3 border-b border-white/10">
+                      <p className="text-xs text-white/70">Signed in as</p>
+                      <p className="text-sm font-semibold text-white truncate">
+                        {currentUser?.email || 'Admin'}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" strokeWidth={2.0} />
+                      <span className="font-[300] tracking-wide">Sign out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="lg:hidden flex items-center">
@@ -135,9 +214,16 @@ const Header = () => {
             ))}
             
             <div className="mt-4 pt-4 border-t border-white/10 flex justify-start items-center">
-              <button className="flex items-center space-x-3 text-white bg-white/10 px-5 py-2.5 rounded-full hover:bg-white/20 transition-all">
-                <User className="w-5 h-5" strokeWidth={2.0} />
-                <span className="font-[300] tracking-wide">Admin Profile</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleSignOut();
+                }}
+                className="flex items-center space-x-3 text-white bg-white/10 px-5 py-2.5 rounded-full hover:bg-white/20 transition-all"
+              >
+                <LogOut className="w-5 h-5" strokeWidth={2.0} />
+                <span className="font-[300] tracking-wide">Sign out</span>
               </button>
             </div>
 
