@@ -4,7 +4,7 @@ const API = axios.create({
   baseURL: 'http://localhost:5050/api', 
 });
 
-const DEV_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTE4ODRlZTI2NzUzYmY2YmJlN2I5OSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc0OTcyMTUwLCJleHAiOjE3NzU1NzY5NTB9.RbEIphqvadL85US8okUH_jDYM10Q7hSi0z3XS9m94Pg";
+const DEV_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTE4OGQ0ZTI2NzUzYmY2YmJlN2I5ZiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3NTAzODQyNCwiZXhwIjoxNzc1NjQzMjI0fQ.Q5YECZE9FRdxAesu91PqDs3Janyu1iaqBAFtHMu7R9k";
 
 export const getAuthToken = () => {
   if (typeof window !== 'undefined') {
