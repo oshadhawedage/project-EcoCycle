@@ -46,6 +46,7 @@ function App() {
 
         {/* ================= ADMIN DASHBOARD ROUTES ================= */}
         <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/dashboard" element={<AnalyticsDashboard />} />
           <Route path="/admin/logs" element={<ImpactLogs />} />
           <Route path="/admin/settings" element={<ImpactSettings />} />
