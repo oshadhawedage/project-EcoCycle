@@ -22,6 +22,10 @@ import AdminLayout from './components/layout/AdminLayout';
 import UserLayout from './components/layout/UserLayout';
 import RecyclerLayout from './components/layout/RecyclerLayout';
 
+// E-Waste Pages
+import EwasteList from "./pages/ewaste/EwasteList";
+import CreateEwaste from "./pages/ewaste/CreateEwaste";
+
 // Other Pages
 import RecyclerPickupsPage from "./pages/pickups/RecyclerPickupsPage"; // recycler
 
@@ -50,11 +54,14 @@ function App() {
           <Route path="/admin/dashboard" element={<AnalyticsDashboard />} />
           <Route path="/admin/logs" element={<ImpactLogs />} />
           <Route path="/admin/settings" element={<ImpactSettings />} />
+          <Route path="/admin/ewaste" element={<EwasteList />} />
         </Route>
 
         {/* ================= USER DASHBOARD ROUTES ================= */}
         <Route element={<UserLayout />}>
           <Route path="/user/dashboard" element={<div>User Dashboard</div>} />
+          <Route path="/user/ewaste" element={<EwasteList />} />
+          <Route path="/user/ewaste/create" element={<CreateEwaste />} />
         </Route>
 
         {/* ================= RECYCLER DASHBOARD ROUTES ================= */}
@@ -62,6 +69,7 @@ function App() {
           <Route path="/recycler/dashboard" element={<div>Recycler Dashboard</div>} />
           <Route path="/pickups" element={<RecyclerPickupsPage />} />
           <Route path="/pickups/accepted" element={<RecyclerPickupsPage mode="accepted" />}/>
+          <Route path="/recycler/ewaste" element={<EwasteList />} />
         </Route>
 
       </Routes>
