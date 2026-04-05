@@ -75,6 +75,25 @@ export const getImpactLogs = (filters = {}) => API.get('/impact-logs', { params:
 export const getSettings = () => API.get('/settings');
 export const updateSettings = (data) => API.put('/settings', data);
 
+// ================= EWASTE APIs =================
+export const createEwasteItem = (data) =>
+  API.post("/ewaste", data);
+
+// USER gets ONLY their items (backend handles filtering)
+export const getMyEwasteItems = () =>
+  API.get("/ewaste");
+
+// ADMIN or RECYCLER may also use same endpoint depending on role logic
+
+export const getEwasteItemById = (id) =>
+  API.get(`/ewaste/${id}`);
+
+export const updateEwasteItem = (id, data) =>
+  API.put(`/ewaste/${id}`, data);
+
+export const deleteEwasteItem = (id) =>
+  API.delete(`/ewaste/${id}`);
+
 export default API;
 
 // ================= PICKUP REQUEST APIs =================

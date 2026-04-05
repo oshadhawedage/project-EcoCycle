@@ -14,7 +14,7 @@ const EwasteItemSchema = new mongoose.Schema(
     condition: {
       type: String,
       required: [true, "Condition is required"],
-      enum: ["New", "Used", "NOT WORKING"],
+      enum: ["New", "Used", "Not Working"],
     },
     age: {
       type: Number,
