@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, LogOut, UserCircle } from 'lucide-react';
+import { Search, Menu, X, LogOut, UserCircle, Briefcase } from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
 import API, { setAuthToken } from '../../services/api';
 
@@ -9,6 +9,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [pendingRecyclerCount, setPendingRecyclerCount] = useState(0);
   const location = useLocation();
   const profileMenuRef = useRef(null);
 
@@ -18,6 +19,7 @@ const Header = () => {
     { name: 'Dashboard', path: '/admin/dashboard' },
     { name: 'Records', path: '/admin/logs' }, 
     { name: 'Users', path: '/users' },
+    { name: 'Recycler Requests', path: '/admin/recycler-requests' },
     { name: 'Reports', path: '/reports' },
     { name: 'Configuration', path: '/admin/settings' },
   ];
@@ -40,6 +42,28 @@ const Header = () => {
     document.addEventListener('mousedown', onDocMouseDown);
     return () => document.removeEventListener('mousedown', onDocMouseDown);
   }, [isProfileMenuOpen]);
+
+  // Fetch pending recycler requests count
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const response = await API.get('/admin/recycler-requests');
+        const pendingRequests = response.data.requests?.filter(
+          (req) => req.status === 'PENDING'
+        ) || [];
+        setPendingRecyclerCount(pendingRequests.length);
+      } catch (err) {
+        console.error('Error fetching recycler requests:', err);
+        setPendingRecyclerCount(0);
+      }
+    };
+
+    fetchPendingCount();
+
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchPendingCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -79,13 +103,21 @@ const Header = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`text-[15px] font-[300] tracking-wide py-1 border-b-2 transition-all duration-200 ${
+                  className={`relative text-[15px] font-[300] tracking-wide py-1 border-b-2 transition-all duration-200 flex items-center gap-2 ${
                     isActive(link.path)
                       ? 'text-white border-white'
                       : 'text-white/90 border-transparent hover:border-white hover:text-white'
                   }`}
                 >
-                  {link.name}
+                  {link.name === 'Recycler Requests' && <Briefcase className="w-4 h-4" strokeWidth={2.0} />}
+                  <span>{link.name}</span>
+                  
+                  {/* Badge for pending recycler requests */}
+                  {link.name === 'Recycler Requests' && pendingRecyclerCount > 0 && (
+                    <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ml-1 animate-pulse">
+                      {pendingRecyclerCount}
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>
@@ -203,13 +235,21 @@ const Header = () => {
                 key={link.name}
                 to={link.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-4 py-3 rounded-lg text-[15px] font-[300] tracking-wide transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg text-[15px] font-[300] tracking-wide transition-colors ${
                   isActive(link.path)
                     ? 'bg-white/20 text-white'
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                {link.name}
+                {link.name === 'Recycler Requests' && <Briefcase className="w-4 h-4" strokeWidth={2.0} />}
+                <span>{link.name}</span>
+                
+                {/* Badge for pending recycler requests - Mobile */}
+                {link.name === 'Recycler Requests' && pendingRecyclerCount > 0 && (
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ml-auto animate-pulse">
+                    {pendingRecyclerCount}
+                  </span>
+                )}
               </Link>
             ))}
             
