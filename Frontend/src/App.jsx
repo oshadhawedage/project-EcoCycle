@@ -32,6 +32,7 @@ import RecyclerRequestPage from "./pages/recycler/RecyclerRequestPage";
 // Admin Pages
 import RecyclerRequestsPage from "./pages/admin/RecyclerRequestsPage";
 import UserManagement from "./pages/admin/Users";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 // Other Pages
 import RecyclerPickupsPage from "./pages/pickups/RecyclerPickupsPage"; // recycler
@@ -64,6 +65,7 @@ function App() {
           <Route path="/admin/ewaste" element={<EwasteList />} />
           <Route path="/admin/recycler-requests" element={<RecyclerRequestsPage />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
         </Route>
 
         {/* ================= USER DASHBOARD ROUTES ================= */}
