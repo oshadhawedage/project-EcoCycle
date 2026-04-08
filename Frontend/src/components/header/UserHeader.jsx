@@ -1,40 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, User, Menu, X, Briefcase } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, User, Menu, X, Briefcase, CheckCircle, XCircle } from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
 import API from '../../services/api';
 
 const UserHeader = () => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showRecyclerModal, setShowRecyclerModal] = useState(false);
   const [userData, setUserData] = useState(null);
   const [recyclerRequest, setRecyclerRequest] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [isApproved, setIsApproved] = useState(false);
+  const [prevUserRole, setPrevUserRole] = useState(null);
   const location = useLocation();
+
+  // Toast notification helper
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  };
 
   // Fetch user data and recycler request status
   useEffect(() => {
     const fetchData = async () => {
       try {
         const userRes = await API.get('/users/me');
+        const currentRole = userRes.data.user.role;
+        
         setUserData(userRes.data.user);
 
+        // ✅ Detect role change from USER to RECYCLER (Approval happened!)
+        if (prevUserRole === 'USER' && currentRole === 'RECYCLER') {
+          setIsApproved(true);
+          showNotification('🎉 Congratulations! Your recycler request has been approved!', 'success');
+          
+          // Auto-redirect to recycler dashboard after 8 seconds
+          setTimeout(() => {
+            navigate('/recycler/dashboard');
+          }, 8000);
+        }
+
+        setPrevUserRole(currentRole);
+
         // Only fetch recycler request if user is not already a recycler
-        if (userRes.data.user.role === 'USER') {
+        if (currentRole === 'USER') {
           try {
             const recyclerRes = await API.get('/users/recycler-request/me');
             setRecyclerRequest(recyclerRes.data.request);
+
+            // ✅ Detect rejection
+            if (recyclerRes.data.request?.status === 'REJECTED') {
+              showNotification('❌ Your recycler request was rejected. You can resubmit.', 'error');
+            }
           } catch (err) {
             // No recycler request found yet
             setRecyclerRequest(null);
           }
+        } else {
+          setRecyclerRequest(null);
         }
       } catch (err) {
         console.error('Error fetching user data:', err);
       }
     };
 
+    // Fetch immediately on mount
     fetchData();
-  }, []);
+
+    // ✅ Set up polling - refresh every 20 seconds
+    const interval = setInterval(fetchData, 20000);
+
+    // Cleanup interval when component unmounts
+    return () => clearInterval(interval);
+  }, [prevUserRole, navigate]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -47,6 +86,22 @@ const UserHeader = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f55a7] from-50% to-[#4db848] shadow-md">
+
+      {/* ✅ Toast Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-[999] px-6 py-4 rounded-lg shadow-lg animate-slideIn flex items-center gap-3 ${
+          notification.type === 'success'
+            ? 'bg-green-500 text-white'
+            : 'bg-red-500 text-white'
+        }`}>
+          {notification.type === 'success' ? (
+            <CheckCircle className="w-5 h-5 flex-shrink-0" strokeWidth={2.0} />
+          ) : (
+            <XCircle className="w-5 h-5 flex-shrink-0" strokeWidth={2.0} />
+          )}
+          <span className="font-[300] text-[14px]">{notification.message}</span>
+        </div>
+      )}
 
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
 
@@ -82,7 +137,7 @@ const UserHeader = () => {
 
           <div className="flex-1 flex justify-end items-center gap-4">
             {/* Become Recycler Button - Only show if USER role */}
-            {userData?.role === 'USER' && (
+            {userData?.role === 'USER' && !isApproved && (
               <button
                 onClick={() => setShowRecyclerModal(true)}
                 className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-[300] text-[14px] tracking-wide transition-all duration-200 ${
@@ -102,6 +157,17 @@ const UserHeader = () => {
                     ? 'Resubmit'
                     : 'Become Recycler'}
                 </span>
+              </button>
+            )}
+
+            {/* ✅ Approved Button - Show briefly before redirect */}
+            {isApproved && userData?.role === 'RECYCLER' && (
+              <button
+                disabled
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-[300] text-[14px] tracking-wide bg-green-500/20 text-green-100 animate-pulse"
+              >
+                <CheckCircle className="w-4 h-4" strokeWidth={2.0} />
+                <span>Approved ✅</span>
               </button>
             )}
 
@@ -146,7 +212,7 @@ const UserHeader = () => {
             ))}
 
             {/* Mobile Become Recycler Button */}
-            {userData?.role === 'USER' && (
+            {userData?.role === 'USER' && !isApproved && (
               <button
                 onClick={() => {
                   setShowRecyclerModal(true);
@@ -168,6 +234,17 @@ const UserHeader = () => {
                     ? 'Resubmit'
                     : 'Become Recycler'}
                 </span>
+              </button>
+            )}
+
+            {/* ✅ Mobile Approved Button */}
+            {isApproved && userData?.role === 'RECYCLER' && (
+              <button
+                disabled
+                className="w-full text-left px-4 py-3 rounded-lg text-[15px] font-[300] tracking-wide flex items-center gap-2 bg-green-500/20 text-green-100 animate-pulse"
+              >
+                <CheckCircle className="w-4 h-4" strokeWidth={2.0} />
+                <span>Approved ✅</span>
               </button>
             )}
           </div>
