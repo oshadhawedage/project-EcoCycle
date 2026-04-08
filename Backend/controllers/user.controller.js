@@ -44,7 +44,15 @@ export const updateMe = async (req, res, next) => {
 
       if (recyclerDetails && typeof recyclerDetails === "object") {
         // whitelist inside recyclerDetails (safe)
-        const allowedRecyclerFields = ["businessName", "serviceArea", "location"];
+        const allowedRecyclerFields = [
+          "businessName",
+          "serviceArea", 
+          "location",
+          "companyName",
+          "businessType",
+          "yearsInBusiness",
+          "licenseNumber"
+        ];
         for (const key of allowedRecyclerFields) {
           if (recyclerDetails[key] !== undefined) {
             user.recyclerDetails[key] = recyclerDetails[key];
