@@ -28,6 +28,7 @@ import CreateEwaste from "./pages/ewaste/CreateEwaste";
 
 // Recycler Pages
 import RecyclerRequestPage from "./pages/recycler/RecyclerRequestPage";
+import RecyclerProfile from "./pages/recycler/RecyclerProfile";
 
 // Admin Pages
 import RecyclerRequestsPage from "./pages/admin/RecyclerRequestsPage";
@@ -83,6 +84,7 @@ function App() {
           <Route path="/pickups" element={<RecyclerPickupsPage />} />
           <Route path="/pickups/accepted" element={<RecyclerPickupsPage mode="accepted" />}/>
           <Route path="/recycler/ewaste" element={<EwasteList />} />
+          <Route path="/recycler/profile" element={<RecyclerProfile />} />
         </Route>
 
       </Routes>
