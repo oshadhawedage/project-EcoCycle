@@ -32,6 +32,9 @@ import {
   getAdminProfile,
   adminForgotPassword,
   adminResetPassword,
+  updateAdminProfile,
+  changeAdminPassword,
+  deleteAdminProfile,
   getAllUsers,
   updateUserRole,
   blockUser,
@@ -72,6 +75,9 @@ router.use(authorizeRoles("ADMIN"));
 
 // Admin Profile Routes
 router.get("/me", getAdminProfile);
+router.patch("/update-profile", updateAdminProfile);
+router.post("/change-password", changeAdminPassword);
+router.delete("/profile", deleteAdminProfile);
 router.post("/logout", adminLogout);
 
 // ===== ADMIN USER MANAGEMENT ROUTES =====
