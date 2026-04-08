@@ -128,7 +128,7 @@ const RecyclerHeader = () => {
                     <div className="py-2">
                       <button
                         onClick={() => {
-                          navigate('/profile');
+                          navigate('/recycler/profile');
                           setIsProfileMenuOpen(false);
                         }}
                         className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-3 text-sm transition-colors"
