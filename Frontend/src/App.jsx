@@ -32,6 +32,7 @@ import CreateEwaste from "./pages/ewaste/CreateEwaste";
 // Recycler Pages
 import RecyclerRequestPage from "./pages/recycler/RecyclerRequestPage";
 import RecyclerProfile from "./pages/recycler/RecyclerProfile";
+import RecyclerDashboard from './pages/recycler/RecyclerDashboard';
 
 // Admin Pages
 import RecyclerRequestsPage from "./pages/admin/RecyclerRequestsPage";
@@ -84,9 +85,9 @@ function App() {
 
         {/* ================= RECYCLER DASHBOARD ROUTES ================= */}
         <Route element={<RecyclerLayout />}>
-          <Route path="/recycler/dashboard" element={<div>Recycler Dashboard</div>} />
+          <Route path="/recycler/dashboard" element={<RecyclerDashboard />} />
           <Route path="/pickups" element={<RecyclerPickupsPage />} />
-          <Route path="/pickups/accepted" element={<RecyclerPickupsPage mode="accepted" />}/>
+          <Route path="/pickups/accepted" element={<RecyclerPickupsPage mode="accepted" />} />
           <Route path="/recycler/ewaste" element={<EwasteList />} />
           <Route path="/recycler/profile" element={<RecyclerProfile />} />
         </Route>

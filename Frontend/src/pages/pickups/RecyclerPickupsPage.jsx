@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import PickupRequestCard from "../../components/pickup/PickupRequestCard";
 import PickupRequestDetails from "../../components/pickup/PickupRequestDetails";
+import { useLocation } from "react-router-dom";
 import {
   acceptPickupRequest,
   getAcceptedPickupRequests,
@@ -9,11 +10,10 @@ import {
   getPickupRequestById,
   updatePickupRequestStatus,
 } from "../../services/api";
-import { useLocation, useNavigate } from "react-router-dom";
 
 const RecyclerPickupsPage = () => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
   const activeTabFromURL = location.pathname.includes("accepted")
     ? "accepted"
@@ -102,7 +102,8 @@ const RecyclerPickupsPage = () => {
       setAccepting(true);
       await acceptPickupRequest(id);
 
-      navigate("/pickups/accepted");
+      setShowModal(false);
+      await fetchRequests();
     } catch (error) {
       alert(error?.response?.data?.message || "Failed to accept request");
     } finally {
@@ -167,7 +168,7 @@ const RecyclerPickupsPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="space-y-4">
             {loadingList ? (
               <div className="rounded-3xl bg-white border border-slate-200 p-8 text-center text-slate-500">
@@ -183,29 +184,53 @@ const RecyclerPickupsPage = () => {
                   key={request._id}
                   request={request}
                   selected={selectedId === request._id}
-                  onClick={() => setSelectedId(request._id)}
+                  onClick={() => {
+                     setSelectedId(request._id);
+                     setShowModal(true);
+                  }}
                 />
               ))
             )}
           </div>
 
-          <div>
+          
+        </div>
+      </section>
+
+            {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="w-full max-w-4xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             {loadingDetails ? (
-              <div className="rounded-3xl bg-white border border-slate-200 p-8 text-center text-slate-500 min-h-[420px]">
+              <div className="rounded-3xl bg-white border border-slate-200 p-8 text-center text-slate-500 min-h-[420px] shadow-xl">
                 Loading request details...
               </div>
             ) : (
-              <PickupRequestDetails
-                request={selectedRequest}
-                onAccept={handleAccept}
-                onUpdateStatus={handleUpdateStatus}
-                accepting={accepting}
-                updating={updating}
-              />
+              <div className="relative">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="absolute -top-3 -right-3 z-10 bg-white text-slate-700 border border-slate-200 rounded-full w-10 h-10 shadow hover:bg-slate-50"
+                >
+                  ×
+                </button>
+
+                <PickupRequestDetails
+                  request={selectedRequest}
+                  onAccept={handleAccept}
+                  onUpdateStatus={handleUpdateStatus}
+                  accepting={accepting}
+                  updating={updating}
+                />
+              </div>
             )}
           </div>
         </div>
-      </section>
+      )}
     </main>
   );
 };
