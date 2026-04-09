@@ -7,6 +7,9 @@ import Login from './pages/auth/Login';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import ForgotPassword from './pages/auth/ForgotPassword';
 
+// User Pages
+import UserProfile from './pages/user/UserProfile';
+
 import AdminRegister from './pages/auth/admin/AdminRegister';
 import AdminLogin from './pages/auth/admin/AdminLogin';
 import AdminVerifyEmail from './pages/auth/admin/AdminVerifyEmail';
@@ -76,6 +79,7 @@ function App() {
           <Route path="/user/ewaste" element={<EwasteList />} />
           <Route path="/user/ewaste/create" element={<CreateEwaste />} />
           <Route path="/recycler-request" element={<RecyclerRequestPage />} />
+          <Route path="/profile" element={<UserProfile />} />
         </Route>
 
         {/* ================= RECYCLER DASHBOARD ROUTES ================= */}
