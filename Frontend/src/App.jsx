@@ -7,6 +7,9 @@ import Login from './pages/auth/Login';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import ForgotPassword from './pages/auth/ForgotPassword';
 
+// User Pages
+import UserProfile from './pages/user/UserProfile';
+
 import AdminRegister from './pages/auth/admin/AdminRegister';
 import AdminLogin from './pages/auth/admin/AdminLogin';
 import AdminVerifyEmail from './pages/auth/admin/AdminVerifyEmail';
@@ -28,10 +31,12 @@ import CreateEwaste from "./pages/ewaste/CreateEwaste";
 
 // Recycler Pages
 import RecyclerRequestPage from "./pages/recycler/RecyclerRequestPage";
+import RecyclerProfile from "./pages/recycler/RecyclerProfile";
 
 // Admin Pages
 import RecyclerRequestsPage from "./pages/admin/RecyclerRequestsPage";
 import UserManagement from "./pages/admin/Users";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 // Other Pages
 import RecyclerPickupsPage from "./pages/pickups/RecyclerPickupsPage"; // recycler
@@ -64,6 +69,7 @@ function App() {
           <Route path="/admin/ewaste" element={<EwasteList />} />
           <Route path="/admin/recycler-requests" element={<RecyclerRequestsPage />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
         </Route>
 
         {/* ================= USER DASHBOARD ROUTES ================= */}
@@ -73,6 +79,7 @@ function App() {
           <Route path="/user/ewaste" element={<EwasteList />} />
           <Route path="/user/ewaste/create" element={<CreateEwaste />} />
           <Route path="/recycler-request" element={<RecyclerRequestPage />} />
+          <Route path="/profile" element={<UserProfile />} />
         </Route>
 
         {/* ================= RECYCLER DASHBOARD ROUTES ================= */}
@@ -81,6 +88,7 @@ function App() {
           <Route path="/pickups" element={<RecyclerPickupsPage />} />
           <Route path="/pickups/accepted" element={<RecyclerPickupsPage mode="accepted" />}/>
           <Route path="/recycler/ewaste" element={<EwasteList />} />
+          <Route path="/recycler/profile" element={<RecyclerProfile />} />
         </Route>
 
       </Routes>

@@ -12,6 +12,7 @@ export function shapeUserResponse(user) {
     address: user.address,
     profileImage: user.profileImage,
     isEmailVerified: user.isEmailVerified,
+    lastLogin: user.lastLogin,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
   };

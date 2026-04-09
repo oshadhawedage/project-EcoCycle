@@ -15,13 +15,26 @@ const addressSchema = new mongoose.Schema(
 
 const recyclerDetailsSchema = new mongoose.Schema(
   {
+    // Business Information
     businessName: { type: String, default: "" },
+    companyName: { type: String, default: "" },
+    businessType: { type: String, default: "" }, // e.g. "E-Waste Recycler"
+    yearsInBusiness: { type: Number, default: 0 },
+    licenseNumber: { type: String, default: "" },
+    
+    // Service Information
     serviceArea: { type: [String], default: [] }, // e.g. ["Colombo", "Gampaha"]
     isVerifiedRecycler: { type: Boolean, default: false },
+    isApproved: { type: Boolean, default: false },
+    
+    // Performance Metrics
     rating: { type: Number, default: 0, min: 0, max: 5 },
     totalReviews: { type: Number, default: 0 },
+    totalPickups: { type: Number, default: 0 },
+    totalRequests: { type: Number, default: 0 },
+    approvalRate: { type: Number, default: 0, min: 0, max: 100 },
 
-    // Optional: location for "nearby pickups" later
+    // Location for "nearby pickups" later
     location: {
       type: {
         type: String,

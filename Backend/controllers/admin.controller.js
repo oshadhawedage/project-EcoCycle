@@ -544,8 +544,10 @@ export const getAdminProfile = async (req, res, next) => {
         email: admin.email,
         role: admin.role,
         phone: admin.phone,
+        address: admin.address || {},
         profileImage: admin.profileImage,
-        permissions: admin.adminDetails.permissions,
+        isEmailVerified: admin.isEmailVerified,
+        permissions: admin.adminDetails?.permissions || [],
         lastLogin: admin.lastLogin,
         createdAt: admin.createdAt
       }
@@ -673,6 +675,121 @@ export const adminResetPassword = async (req, res, next) => {
 
     res.json({ 
       message: "Admin password reset successfully" 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Update Admin Profile
+ * Updates admin's own profile information (fullName, phone, address)
+ */
+export const updateAdminProfile = async (req, res, next) => {
+  try {
+    const { fullName, phone, address } = req.body;
+    const adminId = req.user._id;
+
+    const admin = await User.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Update profile fields
+    if (fullName) admin.fullName = fullName;
+    if (phone) admin.phone = phone;
+    if (address) {
+      admin.address = {
+        street: address.street || admin.address?.street || '',
+        city: address.city || admin.address?.city || '',
+        province: address.province || admin.address?.province || '',
+        postalCode: address.postalCode || admin.address?.postalCode || ''
+      };
+    }
+
+    const result = await admin.save();
+    const safeUser = await User.findById(result._id).select("-passwordHash");
+
+    res.json({
+      message: "Admin profile updated successfully",
+      user: safeUser
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Change Admin Password
+ * Changes admin's password with current password verification
+ */
+export const changeAdminPassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const adminId = req.user._id;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        message: "Current password and new password are required" 
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        message: "New password must be at least 6 characters" 
+      });
+    }
+
+    const admin = await User.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, admin.passwordHash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        message: "Current password is incorrect" 
+      });
+    }
+
+    // Hash and update new password
+    admin.passwordHash = await bcrypt.hash(newPassword, 10);
+    await admin.save();
+
+    // Revoke all existing tokens for this admin (force re-login)
+    await RevokedToken.deleteMany({ userId: adminId });
+
+    res.json({
+      message: "Password changed successfully. Please login again."
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Delete Admin Profile
+ * Soft deletes admin's own account
+ */
+export const deleteAdminProfile = async (req, res, next) => {
+  try {
+    const adminId = req.user._id;
+
+    const admin = await User.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Soft delete by setting deletedAt timestamp
+    admin.deletedAt = new Date();
+    await admin.save();
+
+    // Revoke all tokens
+    await RevokedToken.deleteMany({ userId: adminId });
+
+    res.json({
+      message: "Admin account deleted successfully"
     });
   } catch (err) {
     next(err);
