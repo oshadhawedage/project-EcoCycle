@@ -1,3 +1,4 @@
+//emailService.js
 /* Importing nodemailer library to send emails to 
 users when their pickup request status changes */
 import nodemailer from "nodemailer";
