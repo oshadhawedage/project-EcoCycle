@@ -1,3 +1,4 @@
+//RecyclerPickupsPage.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import PickupRequestCard from "../../components/pickup/PickupRequestCard";
