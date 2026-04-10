@@ -82,7 +82,10 @@ const UserHeader = () => {
               showNotification('❌ Your recycler request was rejected. You can resubmit.', 'error');
             }
           } catch (err) {
-            // No recycler request found yet
+            // 404 is expected if no recycler request exists yet
+            if (err.response?.status !== 404) {
+              console.error('Error fetching recycler request:', err);
+            }
             setRecyclerRequest(null);
           }
         } else {

@@ -76,6 +76,7 @@ const Login = () => {
       // Store token and user data
       setAuthToken(token);
       localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('userRole', user.role); // Store role for later use
 
       setSuccessMessage('Login successful! Redirecting to dashboard...');
 

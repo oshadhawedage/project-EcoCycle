@@ -28,6 +28,7 @@ import RecyclerLayout from './components/layout/RecyclerLayout';
 // E-Waste Pages
 import EwasteList from "./pages/ewaste/EwasteList";
 import CreateEwaste from "./pages/ewaste/CreateEwaste";
+import EditEwaste from "./pages/ewaste/EditEwaste";
 
 // Recycler Pages
 import RecyclerRequestPage from "./pages/recycler/RecyclerRequestPage";
@@ -76,9 +77,10 @@ function App() {
         {/* ================= USER DASHBOARD ROUTES ================= */}
         <Route element={<UserLayout />}>
           <Route path="/user" element={<Navigate to="/user/dashboard" replace />} />
-          <Route path="/user/dashboard" element={<div>User Dashboard</div>} />
-          <Route path="/user/ewaste" element={<EwasteList />} />
+          <Route path="/user/dashboard" element={<EwasteList/>} />
+          {/* <Route path="/user/ewaste" element={<EwasteList />} /> */}
           <Route path="/user/ewaste/create" element={<CreateEwaste />} />
+          <Route path="/user/ewaste/edit/:id" element={<EditEwaste />} />
           <Route path="/recycler-request" element={<RecyclerRequestPage />} />
           <Route path="/profile" element={<UserProfile />} />
         </Route>
