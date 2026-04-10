@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+// Landing Page
+import LandingPage from './pages/landing/LandingPage';
+
 // Auth Pages
 import Register from './pages/auth/Register';
 import Login from './pages/auth/Login';
@@ -48,7 +51,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
 
         {/* ================= USER AUTH ROUTES ================= */}
         <Route path="/register" element={<Register />} />
