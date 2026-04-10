@@ -23,6 +23,9 @@ import {
   Legend,
 } from 'recharts';
 
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 import {
   getCategoryDistribution,
   getLeaderboard,
@@ -41,15 +44,20 @@ const AnalyticsDashboard = () => {
     categories: [],
     leaderboard: [],
   });
+
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [overviewPeriod, setOverviewPeriod] = useState('all_time');
+  const [trendRange, setTrendRange] = useState(6);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+
       try {
         const results = await Promise.allSettled([
-          getOverview(),
-          getMonthlyTrend(),
+          getOverview(overviewPeriod),
+          getMonthlyTrend(trendRange),
           getCategoryDistribution(),
           getLeaderboard(),
         ]);
@@ -68,7 +76,7 @@ const AnalyticsDashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [overviewPeriod, trendRange]);
 
   const { overview, trend, categories, leaderboard } = data;
 
@@ -87,7 +95,7 @@ const AnalyticsDashboard = () => {
       };
     }
 
-    const chartTrend = (Array.isArray(trend) ? trend : []).slice(-6).map((item) => {
+    const chartTrend = (Array.isArray(trend) ? trend : []).map((item) => {
       const parts = item.month ? item.month.split('-') : [];
       const monthName =
         parts.length === 2
@@ -98,7 +106,10 @@ const AnalyticsDashboard = () => {
 
       return {
         name: monthName,
+        monthKey: item.month,
         Weight: Number(item.weightKg) || 0,
+        co2SavedKg: Number(item.co2SavedKg) || 0,
+        actionsCount: Number(item.actionsCount) || 0,
       };
     });
 
@@ -137,6 +148,119 @@ const AnalyticsDashboard = () => {
     { id: 'activity', label: 'Recent Logs', icon: List },
   ];
 
+  const handleExportTrendCSV = () => {
+    const rows = [
+      ['Month', 'Weight (kg)', 'CO2 Saved (kg)', 'Actions Count'],
+      ...computed.chartTrend.map((item) => [
+        item.monthKey,
+        item.Weight,
+        item.co2SavedKg,
+        item.actionsCount,
+      ]),
+    ];
+
+    const csvContent = rows.map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `collection-trends-${trendRange}-months.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportOverviewReport = () => {
+    const rows = [
+      ['Overview Report'],
+      ['Period', overviewPeriod === 'all_time' ? 'All Time' : 'This Year'],
+      ['Total Diverted (kg)', overview?.totalWeightKg || 0],
+      ['CO2 Averted (kg)', overview?.totalCo2SavedKg || 0],
+      ['Hazardous Items', overview?.hazardousCount || 0],
+      ['Monthly Target (kg)', overview?.monthlyTargetKg || 0],
+      ['This Month Weight (kg)', overview?.thisMonthWeightKg || 0],
+      ['Progress Percent', overview?.progressPercent || 0],
+      [],
+      ['Recent Logs'],
+      ['Date', 'Category', 'Weight (kg)'],
+      ...(computed.recent || []).map((log) => [
+        log.createdAt ? new Date(log.createdAt).toLocaleDateString() : '',
+        log.category || '—',
+        log.weightKg || 0,
+      ]),
+    ];
+
+    const csvContent = rows.map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute(
+      'download',
+      `overview-report-${overviewPeriod === 'all_time' ? 'all-time' : 'this-year'}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportLeaderboardPDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('EcoCycle Leaderboard Report', 14, 18);
+
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 26);
+    doc.text(`Top Contributors Report`, 14, 32);
+
+    const tableBody = (computed.top5 || []).map((user, index) => [
+      `#${index + 1}`,
+      user.userName || 'Unknown',
+      formatNum(user.weightKg),
+      formatNum(user.co2SavedKg),
+      formatNum(user.actionsCount),
+    ]);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['Rank', 'User', 'Diverted (kg)', 'CO2 Saved (kg)', 'Actions']],
+      body: tableBody,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [15, 85, 167],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 4,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+    });
+
+    const finalY = doc.lastAutoTable?.finalY || 60;
+
+    doc.setFontSize(11);
+    doc.setTextColor(60);
+    doc.text(
+      `Total ranked users shown: ${computed.top5.length}`,
+      14,
+      finalY + 12
+    );
+
+    doc.save('ecocycle-leaderboard-report.pdf');
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'trends':
@@ -146,20 +270,39 @@ const AnalyticsDashboard = () => {
               <>
                 <h3 className="text-2xl font-bold text-slate-900 mb-4">Collection Trends</h3>
                 <p className="text-slate-600 mb-8 leading-relaxed">
-                  Analyze the volume of e-waste collected over the last 6 months. Use this data to
-                  forecast future collection goals and operational capacity.
+                  Analyze the volume of e-waste collected over the selected period. The chart now
+                  includes months with zero values too, so the timeline always stays complete and
+                  professional.
                 </p>
 
                 <div className="flex gap-6 border-b border-slate-200 mb-8">
-                  <button className="pb-2 border-b-2 border-yellow-400 text-slate-900 font-semibold text-sm">
+                  <button
+                    onClick={() => setTrendRange(6)}
+                    className={`pb-2 border-b-2 text-sm font-semibold transition-colors ${
+                      trendRange === 6
+                        ? 'border-yellow-400 text-slate-900'
+                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
                     6 Months
                   </button>
-                  <button className="pb-2 border-b-2 border-transparent text-slate-500 text-sm cursor-not-allowed">
+
+                  <button
+                    onClick={() => setTrendRange(12)}
+                    className={`pb-2 border-b-2 text-sm font-semibold transition-colors ${
+                      trendRange === 12
+                        ? 'border-yellow-400 text-slate-900'
+                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
                     1 Year
                   </button>
                 </div>
 
-                <button className="bg-[#fcd34d] hover:bg-[#f59e0b] text-slate-900 font-bold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm w-max">
+                <button
+                  onClick={handleExportTrendCSV}
+                  className="bg-[#fcd34d] hover:bg-[#f59e0b] text-slate-900 font-bold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm w-max"
+                >
                   Export Chart <Download className="w-4 h-4" />
                 </button>
               </>
@@ -188,6 +331,7 @@ const AnalyticsDashboard = () => {
                     />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
                     <RechartsTooltip
+                      formatter={(value) => [`${formatNum(value)} kg`, 'Weight']}
                       contentStyle={{
                         borderRadius: '8px',
                         border: 'none',
@@ -279,7 +423,10 @@ const AnalyticsDashboard = () => {
                   the charge in diverting weight from landfills.
                 </p>
 
-                <button className="bg-[#fcd34d] hover:bg-[#f59e0b] text-slate-900 font-bold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm w-max">
+                <button
+                  onClick={handleExportLeaderboardPDF}
+                  className="bg-[#fcd34d] hover:bg-[#f59e0b] text-slate-900 font-bold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm w-max"
+                >
                   View Full Report <ArrowRight className="w-4 h-4" />
                 </button>
               </>
@@ -371,16 +518,34 @@ const AnalyticsDashboard = () => {
                 </p>
 
                 <div className="flex gap-6 border-b border-slate-200 mb-8">
-                  <button className="pb-2 border-b-2 border-yellow-400 text-slate-900 font-semibold text-sm">
+                  <button
+                    onClick={() => setOverviewPeriod('all_time')}
+                    className={`pb-2 border-b-2 text-sm font-semibold transition-colors ${
+                      overviewPeriod === 'all_time'
+                        ? 'border-yellow-400 text-slate-900'
+                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
                     All Time
                   </button>
-                  <button className="pb-2 border-b-2 border-transparent text-slate-500 text-sm cursor-not-allowed">
+
+                  <button
+                    onClick={() => setOverviewPeriod('this_year')}
+                    className={`pb-2 border-b-2 text-sm font-semibold transition-colors ${
+                      overviewPeriod === 'this_year'
+                        ? 'border-yellow-400 text-slate-900'
+                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
                     This Year
                   </button>
                 </div>
 
                 <div className="flex items-center gap-6">
-                  <button className="text-slate-600 font-semibold text-sm hover:text-[#0f55a7] transition-colors flex items-center gap-1 group">
+                  <button
+                    onClick={handleExportOverviewReport}
+                    className="text-slate-600 font-semibold text-sm hover:text-[#0f55a7] transition-colors flex items-center gap-1 group"
+                  >
                     Detailed Report
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
