@@ -11,6 +11,8 @@ import {
   getAcceptedPickupRequests,
 } from "../../services/api";
 import RecyclerPickupsPage from "../pickups/RecyclerPickupsPage";
+import headerImage from "../../assets/RecyclerHeader.png";
+
 
 const RecyclerDashboard = () => {
   // Store all pickup requests
@@ -67,21 +69,12 @@ const RecyclerDashboard = () => {
   return (
     <main className="flex-1 bg-[#f5f7fb]">
       {/* ================= HERO SECTION ================= */}
-      <section className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white rounded-3xl">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
-          <p className="uppercase tracking-[0.25em] text-xs text-white/80 mb-3">
-            Recycler Dashboard
-          </p>
-
-          <h1 className="text-3xl md:text-5xl font-semibold mb-3">
-            Pickup Management Center
-          </h1>
-
-          <p className="text-white/90 max-w-2xl text-sm md:text-base">
-            Manage customer pickup requests, monitor accepted collections, and
-            update the recycling workflow efficiently.
-          </p>
-        </div>
+      <section className="rounded-3xl overflow-hidden">
+        <img
+          src={headerImage}
+          alt="Recycler Header"
+          className="w-full h-[220px] object-cover"
+        />
       </section>
 
       <section className="max-w-[1400px] mx-auto py-10 space-y-8">
