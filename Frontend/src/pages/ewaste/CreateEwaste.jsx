@@ -39,7 +39,7 @@ const CreateEwaste = () => {
       await createEwasteItem(payload);
 
       alert("E-Waste item created successfully!");
-      navigate("/user/ewaste");
+      navigate("/user/dashboard");
     } catch (error) {
       console.error(error);
       alert(error?.response?.data?.message || "Failed to create item");
