@@ -1,56 +1,56 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, LogOut, UserCircle, Briefcase, User, Settings, Home } from 'lucide-react';
+import {
+  Search,
+  Menu,
+  X,
+  LogOut,
+  User,
+  Settings,
+  Home,
+} from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
 import API, { setAuthToken } from '../../services/api';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const profileMenuRef = useRef(null);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [pendingRecyclerCount, setPendingRecyclerCount] = useState(0);
-  const location = useLocation();
-  const profileMenuRef = useRef(null);
+  const [adminData, setAdminData] = useState(null);
 
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
     { name: 'Dashboard', path: '/admin/dashboard' },
-    { name: 'Records', path: '/admin/logs' }, 
+    { name: 'Records', path: '/admin/logs' },
     { name: 'Users', path: '/users' },
     { name: 'Recycler Requests', path: '/admin/recycler-requests' },
-    { name: 'Reports', path: '/reports' },
     { name: 'Configuration', path: '/admin/settings' },
   ];
-
-  const currentUser = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('user') || 'null');
-    } catch {
-      return null;
-    }
-  }, []);
-
-  const [adminData, setAdminData] = useState(null);
 
   useEffect(() => {
     const onDocMouseDown = (e) => {
       if (!isProfileMenuOpen) return;
       const node = profileMenuRef.current;
-      if (node && !node.contains(e.target)) setIsProfileMenuOpen(false);
+      if (node && !node.contains(e.target)) {
+        setIsProfileMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', onDocMouseDown);
     return () => document.removeEventListener('mousedown', onDocMouseDown);
   }, [isProfileMenuOpen]);
 
-  // Fetch admin data
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
         const response = await API.get('/admin/me');
-        setAdminData(response.data.admin); // ✅ Fixed: use 'admin' instead of 'user'
+        setAdminData(response.data.admin);
       } catch (err) {
         console.error('Error fetching admin data:', err);
       }
@@ -59,14 +59,12 @@ const Header = () => {
     fetchAdminData();
   }, []);
 
-  // Fetch pending recycler requests count
   useEffect(() => {
     const fetchPendingCount = async () => {
       try {
         const response = await API.get('/admin/recycler-requests');
-        const pendingRequests = response.data.requests?.filter(
-          (req) => req.status === 'PENDING'
-        ) || [];
+        const pendingRequests =
+          response.data.requests?.filter((req) => req.status === 'PENDING') || [];
         setPendingRecyclerCount(pendingRequests.length);
       } catch (err) {
         console.error('Error fetching recycler requests:', err);
@@ -76,7 +74,6 @@ const Header = () => {
 
     fetchPendingCount();
 
-    // Refresh count every 30 seconds
     const interval = setInterval(fetchPendingCount, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -85,7 +82,7 @@ const Header = () => {
     try {
       await API.post('/admin/logout');
     } catch {
-      // Ignore network/auth errors; still clear local session.
+      // ignore signout request failure
     } finally {
       setIsProfileMenuOpen(false);
       setAuthToken(null);
@@ -98,39 +95,34 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f55a7] from-50% to-[#4db848] shadow-md">
-
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-        
         <div className="flex items-center justify-between h-14 md:h-16">
-
           <div className="flex-1 flex justify-start">
             <Link to="/admin/dashboard" className="flex items-center space-x-2 group">
-              <img 
-                src={myLogo} 
-                alt="EcoCycle Brand Logo" 
-                className="h-6 w-auto object-contain group-hover:scale-105 transition-transform duration-300" 
+              <img
+                src={myLogo}
+                alt="EcoCycle Brand Logo"
+                className="h-6 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
           </div>
 
           <div className="hidden lg:flex flex-1 justify-center">
-            <nav className="flex space-x-8 xl:space-x-10">
+            <nav className="flex items-center space-x-6 xl:space-x-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`relative text-[15px] font-[300] tracking-wide py-1 border-b-2 transition-all duration-200 flex items-center gap-2 ${
+                  className={`relative text-[15px] font-[300] tracking-wide py-1 border-b-2 transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
                     isActive(link.path)
                       ? 'text-white border-white'
                       : 'text-white/90 border-transparent hover:border-white hover:text-white'
                   }`}
                 >
-                  {link.name === 'Recycler Requests' && <Briefcase className="w-4 h-4" strokeWidth={2.0} />}
-                  <span>{link.name}</span>
-                  
-                  {/* Badge for pending recycler requests */}
+                  <span className="whitespace-nowrap">{link.name}</span>
+
                   {link.name === 'Recycler Requests' && pendingRecyclerCount > 0 && (
-                    <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ml-1 animate-pulse">
+                    <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
                       {pendingRecyclerCount}
                     </span>
                   )}
@@ -141,11 +133,12 @@ const Header = () => {
 
           <div className="flex-1 flex justify-end items-center gap-4">
             <div className="hidden lg:flex items-center space-x-4">
-
               <div className="flex items-center">
-                <div 
+                <div
                   className={`overflow-hidden transition-all duration-300 ease-in-out flex items-center bg-white/10 rounded-full ${
-                    isSearchOpen ? 'w-48 px-4 py-1.5 opacity-100 mr-2 border border-white/20' : 'w-0 opacity-0 pointer-events-none'
+                    isSearchOpen
+                      ? 'w-48 px-4 py-1.5 opacity-100 mr-2 border border-white/20'
+                      : 'w-0 opacity-0 pointer-events-none'
                   }`}
                 >
                   <input
@@ -156,7 +149,7 @@ const Header = () => {
                   />
                 </div>
 
-                <button 
+                <button
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
                   className="p-1.5 text-white hover:scale-110 transition-transform duration-200"
                 >
@@ -180,16 +173,15 @@ const Header = () => {
 
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-2xl z-50 overflow-hidden">
-                    {/* User Info Section */}
                     <div className="px-4 py-4 bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white">
                       <p className="font-semibold text-sm">{adminData?.fullName || 'Admin'}</p>
-                      <p className="text-xs text-white/80">{adminData?.email || 'admin@email.com'}</p>
+                      <p className="text-xs text-white/80">
+                        {adminData?.email || 'admin@email.com'}
+                      </p>
                     </div>
 
-                    {/* Divider */}
                     <div className="border-b border-gray-200" />
 
-                    {/* Menu Items */}
                     <div className="py-2">
                       <button
                         onClick={() => {
@@ -225,10 +217,8 @@ const Header = () => {
                       </button>
                     </div>
 
-                    {/* Divider */}
                     <div className="border-b border-gray-200" />
 
-                    {/* Sign Out */}
                     <button
                       type="button"
                       onClick={() => {
@@ -258,14 +248,12 @@ const Header = () => {
               </button>
             </div>
           </div>
-
         </div>
       </div>
 
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-[#004d99] border-t border-white/10 shadow-xl absolute w-full left-0">
           <div className="px-6 py-6 space-y-2">
-
             <div className="mb-4">
               <div className="flex items-center bg-white/10 rounded-lg px-3 py-2 border border-white/20">
                 <Search className="w-4 h-4 text-white/70 mr-2" strokeWidth={2.0} />
@@ -288,18 +276,16 @@ const Header = () => {
                     : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                {link.name === 'Recycler Requests' && <Briefcase className="w-4 h-4" strokeWidth={2.0} />}
-                <span>{link.name}</span>
-                
-                {/* Badge for pending recycler requests - Mobile */}
+                <span className="whitespace-nowrap">{link.name}</span>
+
                 {link.name === 'Recycler Requests' && pendingRecyclerCount > 0 && (
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full ml-auto animate-pulse">
+                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full ml-auto animate-pulse">
                     {pendingRecyclerCount}
                   </span>
                 )}
               </Link>
             ))}
-            
+
             <div className="mt-4 pt-4 border-t border-white/10">
               <button
                 type="button"
@@ -313,7 +299,6 @@ const Header = () => {
                 <span className="font-[300] tracking-wide">Sign Out</span>
               </button>
             </div>
-
           </div>
         </div>
       )}

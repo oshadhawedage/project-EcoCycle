@@ -19,13 +19,66 @@ const startOfNextMonth = () => {
   return new Date(now.getFullYear(), now.getMonth() + 1, 1);
 };
 
-// GET /api/analytics/overview
+const startOfYear = () => {
+  const now = new Date();
+  return new Date(now.getFullYear(), 0, 1);
+};
+
+const startOfNextYear = () => {
+  const now = new Date();
+  return new Date(now.getFullYear() + 1, 0, 1);
+};
+
+const formatMonthKey = (year, month) => {
+  return `${year}-${String(month).padStart(2, "0")}`;
+};
+
+const buildMonthSeries = (startDate, monthsCount) => {
+  const months = [];
+  const cursor = new Date(startDate);
+
+  for (let i = 0; i < monthsCount; i += 1) {
+    const year = cursor.getFullYear();
+    const month = cursor.getMonth() + 1;
+
+    months.push({
+      month: formatMonthKey(year, month),
+      weightKg: 0,
+      co2SavedKg: 0,
+      actionsCount: 0,
+    });
+
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  return months;
+};
+
+// GET /api/analytics/overview?period=all_time|this_year
 export const getOverview = async (req, res) => {
   try {
     const settings = await getOrCreateSettings();
 
     const isAdmin = req.user.role === "ADMIN";
-    const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
+    const baseMatchStage = isAdmin ? {} : { userId: req.user._id.toString() };
+
+    const period = req.query.period || "all_time";
+
+    let periodDateMatch = {};
+
+    if (period === "this_year") {
+      periodDateMatch = {
+        createdAt: {
+          $gte: startOfYear(),
+          $lt: startOfNextYear(),
+        },
+      };
+    }
+
+    const matchStage = {
+      ...baseMatchStage,
+      ...periodDateMatch,
+    };
 
     const totalsByAction = await ImpactLog.aggregate([
       { $match: matchStage },
@@ -58,26 +111,43 @@ export const getOverview = async (req, res) => {
     const recycleRatePercent = totalWeightKg ? (recycleWeightKg / totalWeightKg) * 100 : 0;
 
     const hazCountAgg = await ImpactLog.aggregate([
-      { $match: { ...matchStage, category: { $in: hazardousCategories } } },
+      {
+        $match: {
+          ...matchStage,
+          category: { $in: hazardousCategories },
+        },
+      },
       { $group: { _id: null, count: { $sum: 1 } } },
     ]);
+
     const hazardousCount = hazCountAgg[0]?.count || 0;
 
     const from = startOfMonth();
     const to = startOfNextMonth();
 
+    const currentMonthMatch = {
+      ...baseMatchStage,
+      createdAt: { $gte: from, $lt: to },
+    };
+
     const monthAgg = await ImpactLog.aggregate([
-      { $match: { ...matchStage, createdAt: { $gte: from, $lt: to } } },
+      { $match: currentMonthMatch },
       { $group: { _id: null, weightKg: { $sum: "$weightKg" } } },
     ]);
+
     const thisMonthWeightKg = monthAgg[0]?.weightKg || 0;
 
     const monthlyTargetKg = settings.monthlyTargetKg || 0;
-    const progressPercent = monthlyTargetKg ? (thisMonthWeightKg / monthlyTargetKg) * 100 : 0;
+    const progressPercent = monthlyTargetKg
+      ? (thisMonthWeightKg / monthlyTargetKg) * 100
+      : 0;
 
-    const recentLogs = await ImpactLog.find(matchStage).sort({ createdAt: -1 }).limit(10);
+    const recentLogs = await ImpactLog.find(matchStage)
+      .sort({ createdAt: -1 })
+      .limit(10);
 
     return res.status(200).json({
+      period,
       totalWeightKg,
       reusedWeightKg,
       recycleWeightKg,
@@ -120,14 +190,24 @@ export const getMonthlyTrend = async (req, res) => {
       { $sort: { "_id.y": 1, "_id.m": 1 } },
     ]);
 
-    return res.status(200).json(
-      data.map((x) => ({
-        month: `${x._id.y}-${String(x._id.m).padStart(2, "0")}`,
-        weightKg: x.weightKg,
-        co2SavedKg: x.co2SavedKg,
-        actionsCount: x.actionsCount,
-      }))
-    );
+    const completeSeries = buildMonthSeries(start, months);
+
+    const mergedSeries = completeSeries.map((monthItem) => {
+      const found = data.find(
+        (x) => monthItem.month === formatMonthKey(x._id.y, x._id.m)
+      );
+
+      if (!found) return monthItem;
+
+      return {
+        month: monthItem.month,
+        weightKg: found.weightKg || 0,
+        co2SavedKg: found.co2SavedKg || 0,
+        actionsCount: found.actionsCount || 0,
+      };
+    });
+
+    return res.status(200).json(mergedSeries);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -141,7 +221,13 @@ export const getCategoryDistribution = async (req, res) => {
 
     const data = await ImpactLog.aggregate([
       { $match: matchStage },
-      { $group: { _id: "$category", count: { $sum: 1 }, weightKg: { $sum: "$weightKg" } } },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+          weightKg: { $sum: "$weightKg" },
+        },
+      },
       { $sort: { weightKg: -1 } },
     ]);
 
