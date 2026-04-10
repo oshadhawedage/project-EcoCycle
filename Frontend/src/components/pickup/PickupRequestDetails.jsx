@@ -16,6 +16,7 @@ const PickupRequestDetails = ({
   onUpdateStatus,
   accepting,
   updating,
+  mode,
 }) => {
   const nextStatusOptions = useMemo(() => {
     if (!request) return [];
@@ -90,31 +91,40 @@ const PickupRequestDetails = ({
               Recycler Actions
             </h3>
 
-            {request.status === "Pending" && (
+            {/* Pending → Accept */}
+{mode === "pending" && request.status === "Pending" && (
+  <button
+    onClick={() => onAccept(request._id)}
+    disabled={accepting}
+    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-[#0f55a7] to-[#4db848] hover:opacity-95 transition disabled:opacity-60"
+  >
+    <Truck className="w-4 h-4" />
+    {accepting ? "Accepting..." : "Accept Request"}
+  </button>
+)}
+
+            {/* Accepted → Collected */}
+            {mode === "accepted" && request.status === "Accepted" && (
               <button
-                onClick={() => onAccept(request._id)}
-                disabled={accepting}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-[#0f55a7] to-[#4db848] hover:opacity-95 transition disabled:opacity-60"
+                onClick={() => onUpdateStatus(request._id, "Collected")}
+                disabled={updating}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
               >
-                <Truck className="w-4 h-4" />
-                {accepting ? "Accepting..." : "Accept Request"}
+                <CheckCircle2 className="w-4 h-4" />
+                {updating ? "Updating..." : "Mark as Collected"}
               </button>
             )}
 
-            {nextStatusOptions.length > 0 && (
-              <div className="space-y-3">
-                {nextStatusOptions.map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => onUpdateStatus(request._id, status)}
-                    disabled={updating}
-                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    {updating ? "Updating..." : `Mark as ${status}`}
-                  </button>
-                ))}
-              </div>
+            {/* Collected → Completed */}
+            {mode === "collected" && request.status === "Collected" && (
+              <button
+                onClick={() => onUpdateStatus(request._id, "Completed")}
+                disabled={updating}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                {updating ? "Updating..." : "Mark as Completed"}
+              </button>
             )}
 
             {request.status === "Completed" && (
