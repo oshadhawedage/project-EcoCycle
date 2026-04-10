@@ -9,10 +9,11 @@ const RecyclerHeader = () => {
   const isActive = (path) => location.pathname.startsWith(path);
 
   const navLinks = [
-    { name: 'Dashboard', path: '/recycler/dashboard' },
-    { name: 'Requests', path: '/pickups' },
+    { name: 'Home', path: '/recycler/dashboard' },
+    { name: 'Pending', path: '/pickups' },
     { name: 'Accepted', path: '/pickups/accepted' },
-    { name: 'Processing', path: '/processing' },
+    { name: 'Collected', path: '/pickups/collected' },
+    { name: 'Completed', path: '/pickups/completed' },
     { name: 'Reports', path: '/recycler-reports' },
   ];
 

@@ -2,24 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import PickupRequestCard from "../../components/pickup/PickupRequestCard";
 import PickupRequestDetails from "../../components/pickup/PickupRequestDetails";
-import { useLocation } from "react-router-dom";
 import {
   acceptPickupRequest,
-  getAcceptedPickupRequests,
   getAllPickupRequests,
   getPickupRequestById,
   updatePickupRequestStatus,
 } from "../../services/api";
 
-const RecyclerPickupsPage = () => {
-  const location = useLocation();
+const RecyclerPickupsPage = ({ mode = "pending" }) => {
+
   const [showModal, setShowModal] = useState(false);
-
-  const activeTabFromURL = location.pathname.includes("accepted")
-    ? "accepted"
-    : "all";
-
-  const [activeTab, setActiveTab] = useState(activeTabFromURL);
   const [requests, setRequests] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -29,26 +21,34 @@ const RecyclerPickupsPage = () => {
   const [accepting, setAccepting] = useState(false);
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => {
-    setActiveTab(activeTabFromURL);
-  }, [location.pathname, activeTabFromURL]);
+  
 
   const fetchRequests = async () => {
     try {
       setLoadingList(true);
 
-      const response =
-        activeTab === "accepted"
-          ? await getAcceptedPickupRequests()
-          : await getAllPickupRequests();
+      const response = await getAllPickupRequests();
+      const allData = response.data || [];
 
-      setRequests(response.data || []);
+      let filteredByMode = [];
 
-      if (response.data?.length > 0) {
-        const keepSelected = response.data.find(
+      if (mode === "pending") {
+        filteredByMode = allData.filter((item) => item.status === "Pending");
+      } else if (mode === "accepted") {
+        filteredByMode = allData.filter((item) => item.status === "Accepted");
+      } else if (mode === "collected") {
+        filteredByMode = allData.filter((item) => item.status === "Collected");
+      } else if (mode === "completed") {
+        filteredByMode = allData.filter((item) => item.status === "Completed");
+      }
+
+      setRequests(filteredByMode);
+
+      if (filteredByMode.length > 0) {
+        const keepSelected = filteredByMode.find(
           (item) => item._id === selectedId
         );
-        const nextId = keepSelected ? selectedId : response.data[0]._id;
+        const nextId = keepSelected ? selectedId : filteredByMode[0]._id;
         setSelectedId(nextId);
       } else {
         setSelectedId(null);
@@ -77,7 +77,7 @@ const RecyclerPickupsPage = () => {
 
   useEffect(() => {
     fetchRequests();
-  }, [activeTab]);
+  }, [mode]);
 
   useEffect(() => {
     if (selectedId) {
@@ -88,6 +88,7 @@ const RecyclerPickupsPage = () => {
   const filteredRequests = useMemo(() => {
     return requests.filter((item) => {
       const keyword = searchTerm.toLowerCase();
+
       return (
         item.itemName?.toLowerCase().includes(keyword) ||
         item.address?.toLowerCase().includes(keyword) ||
@@ -96,14 +97,16 @@ const RecyclerPickupsPage = () => {
       );
     });
   }, [requests, searchTerm]);
-
+  
   const handleAccept = async (id) => {
     try {
       setAccepting(true);
       await acceptPickupRequest(id);
 
+      setRequests((prev) => prev.filter((item) => item._id !== id));
+      setSelectedId(null);
+      setSelectedRequest(null);
       setShowModal(false);
-      await fetchRequests();
     } catch (error) {
       alert(error?.response?.data?.message || "Failed to accept request");
     } finally {
@@ -115,8 +118,11 @@ const RecyclerPickupsPage = () => {
     try {
       setUpdating(true);
       await updatePickupRequestStatus(id, status);
-      await fetchRequests();
-      await fetchRequestDetails(id);
+
+      setRequests((prev) => prev.filter((item) => item._id !== id));
+      setSelectedId(null);
+      setSelectedRequest(null);
+      setShowModal(false);
     } catch (error) {
       alert(error?.response?.data?.message || "Failed to update status");
     } finally {
@@ -125,12 +131,22 @@ const RecyclerPickupsPage = () => {
   };
 
   const pageTitle =
-    activeTab === "accepted" ? "Accepted Pickup Requests" : "All Pickup Requests";
+    mode === "pending"
+      ? "Pending Pickup Requests"
+      : mode === "accepted"
+      ? "Accepted Pickup Requests"
+      : mode === "collected"
+      ? "Collected Pickup Requests"
+      : "Completed Pickup Requests";
 
   const pageDescription =
-    activeTab === "accepted"
-      ? "View and manage pickup requests accepted by the recycler."
-      : "View and manage all customer pickup requests.";
+    mode === "pending"
+      ? "View pending customer pickup requests ready to be accepted."
+      : mode === "accepted"
+      ? "View accepted pickup requests and mark them as collected."
+      : mode === "collected"
+      ? "View collected pickup requests and mark them as completed."
+      : "View completed pickup requests.";
 
   return (
     <main className="flex-1 bg-[#f5f7fb]">
@@ -225,6 +241,7 @@ const RecyclerPickupsPage = () => {
                   onUpdateStatus={handleUpdateStatus}
                   accepting={accepting}
                   updating={updating}
+                  mode={mode}
                 />
               </div>
             )}

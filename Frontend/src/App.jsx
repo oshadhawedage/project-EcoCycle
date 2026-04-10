@@ -86,8 +86,10 @@ function App() {
         {/* ================= RECYCLER DASHBOARD ROUTES ================= */}
         <Route element={<RecyclerLayout />}>
           <Route path="/recycler/dashboard" element={<RecyclerDashboard />} />
-          <Route path="/pickups" element={<RecyclerPickupsPage />} />
+          <Route path="/pickups" element={<RecyclerPickupsPage mode="pending"/>} />
           <Route path="/pickups/accepted" element={<RecyclerPickupsPage mode="accepted" />} />
+          <Route path="/pickups/collected" element={<RecyclerPickupsPage mode="collected" />} />
+          <Route path="/pickups/completed" element={<RecyclerPickupsPage mode="completed" />} />
           <Route path="/recycler/ewaste" element={<EwasteList />} />
           <Route path="/recycler/profile" element={<RecyclerProfile />} />
         </Route>
