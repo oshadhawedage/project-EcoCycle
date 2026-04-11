@@ -37,13 +37,6 @@ const PickupRequestCard = ({ request, selected, onClick }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <CalendarDays className="w-4 h-4 text-[#0f55a7]" />
-          <span>
-            Preferred Date: {new Date(request.preferredDate).toLocaleDateString()}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
           <UserRound className="w-4 h-4 text-[#0f55a7]" />
           <div className="flex flex-col">
             <span className="font-medium text-slate-700">

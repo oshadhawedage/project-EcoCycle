@@ -51,17 +51,22 @@ const RecyclerDashboard = () => {
 
   // Calculate summary values
   const stats = useMemo(() => {
-    const totalRequests = allRequests.length;
+    const pendingCount = allRequests.filter(
+      (item) => item.status === "Pending"
+    ).length;
+
     const acceptedCount = acceptedRequests.length;
+
     const collectedCount = allRequests.filter(
       (item) => item.status === "Collected"
     ).length;
+
     const completedCount = allRequests.filter(
       (item) => item.status === "Completed"
     ).length;
 
     return {
-      totalRequests,
+      pendingCount,
       acceptedCount,
       collectedCount,
       completedCount,
@@ -89,9 +94,9 @@ const RecyclerDashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Total Requests</p>
+                <p className="text-sm text-slate-500">Pending Requests</p>
                 <h3 className="text-3xl font-semibold text-slate-800 mt-2">
-                  {loadingStats ? "..." : stats.totalRequests}
+                  {loadingStats ? "..." : stats.pendingCount}
                 </h3>
               </div>
               <ClipboardList className="w-10 h-10 text-[#0f55a7]" />
