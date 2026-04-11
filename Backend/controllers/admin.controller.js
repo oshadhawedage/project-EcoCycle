@@ -327,10 +327,18 @@ export const adminVerifyEmailOtp = async (req, res, next) => {
     await user.save();
     await Otp.deleteMany({ userId: user._id, purpose: "ADMIN_VERIFY" });
 
+    const token = generateToken({ id: user._id, role: user.role });
+
     res.json({
-      message: "Admin email verified successfully. You can now login.",
-      email: user.email,
-      verified: true
+      message: "Admin email verified successfully",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
+      }
     });
   } catch (err) {
     next(err);

@@ -37,6 +37,35 @@ const REGISTER_BENEFITS = [
 
 const TRUST_POINTS = ['Email verification included', 'Pickup-ready profile setup', 'Responsive onboarding'];
 
+// Password validation helper function
+const validatePassword = (password) => {
+  const requirements = {
+    minLength: password.length >= 6,
+    hasLowercase: /[a-z]/.test(password),
+    hasUppercase: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+
+  const allRequirementsMet = Object.values(requirements).every(req => req);
+
+  if (!allRequirementsMet) {
+    const missingRequirements = [];
+    if (!requirements.minLength) missingRequirements.push('at least 6 characters');
+    if (!requirements.hasLowercase) missingRequirements.push('a lowercase letter');
+    if (!requirements.hasUppercase) missingRequirements.push('an uppercase letter');
+    if (!requirements.hasNumber) missingRequirements.push('a number');
+    if (!requirements.hasSpecialChar) missingRequirements.push('a special character');
+
+    return {
+      isValid: false,
+      message: `Password must contain: ${missingRequirements.join(', ')}`,
+    };
+  }
+
+  return { isValid: true, message: '' };
+};
+
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -85,14 +114,28 @@ const Register = () => {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    if (formData.phone && !/^[0-9\+\-\(\)\s]{10,}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Please enter a valid phone number';
+    if (formData.phone) {
+      const phoneDigitsOnly = formData.phone.replace(/\D/g, '');
+      
+      // Phone validation: must be 10 digits and start with 0
+      const isValidPhone = /^0\d{9}$/.test(phoneDigitsOnly);
+      
+      if (phoneDigitsOnly.length === 0) {
+        newErrors.phone = 'Phone number is required';
+      } else if (phoneDigitsOnly.length !== 10) {
+        newErrors.phone = 'Phone number must be exactly 10 digits';
+      } else if (!isValidPhone) {
+        newErrors.phone = 'Phone number must start with 0';
+      }
     }
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else {
+      const passwordValidation = validatePassword(formData.password);
+      if (!passwordValidation.isValid) {
+        newErrors.password = passwordValidation.message;
+      }
     }
 
     if (!formData.confirmPassword) {
@@ -330,7 +373,7 @@ const Register = () => {
 
                   <div>
                     <label htmlFor="phone" className="mb-2 block text-sm font-semibold text-slate-900">
-                      Phone Number <span className="font-normal text-slate-500">(Optional)</span>
+                      Phone Number <span className="font-normal text-slate-500"></span>
                     </label>
                     <input
                       id="phone"
@@ -338,7 +381,7 @@ const Register = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="+94 77 123 4567"
+                      placeholder="077 123 4567"
                       className={`w-full rounded-2xl border bg-slate-50 px-4 py-3.5 text-sm text-slate-900 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:ring-4 ${
                         errors.phone
                           ? 'border-red-300 focus:border-red-400 focus:ring-red-100'

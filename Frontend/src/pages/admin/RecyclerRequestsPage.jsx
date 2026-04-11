@@ -24,8 +24,8 @@ const RecyclerRequestsPage = () => {
       setLoading(true);
       try {
         // First check if user is logged in and is admin
-        const userRes = await API.get('/users/me');
-        const userData = userRes.data.user;
+        const userRes = await API.get('/admin/me');
+        const userData = userRes.data.admin;
 
         if (userData.role !== 'ADMIN') {
           setIsAuthorized(false);
