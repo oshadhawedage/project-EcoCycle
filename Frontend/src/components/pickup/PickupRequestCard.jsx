@@ -7,11 +7,14 @@ const PickupRequestCard = ({ request, selected, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left rounded-2xl border p-5 transition shadow-sm ${
-        selected
-          ? "border-[#0f55a7] bg-blue-50"
-          : "border-slate-200 bg-white hover:border-[#4db848] hover:shadow-md"
-      }`}
+      className={`w-full text-left rounded-2xl border p-5 cursor-pointer transition-all duration-200 shadow-sm
+        hover:border-[#4db848] hover:bg-green-50 hover:shadow-lg hover:scale-[1.01]
+        ${
+          selected
+            ? "border-[#0f55a7] bg-blue-50 shadow-md"
+            : "border-slate-200 bg-white"
+        }
+      `}
     >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
