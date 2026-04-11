@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, User, Menu, X, Briefcase, CheckCircle, XCircle, Settings, Home, LogOut } from 'lucide-react';
+import { User, Menu, X, Briefcase, CheckCircle, XCircle, Settings, Home, LogOut } from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
 import API, { setAuthToken } from '../../services/api';
 
@@ -110,8 +110,7 @@ const UserHeader = () => {
 
   const navLinks = [
     { name: 'Home', path: '/user' },
-    { name: 'My Requests', path: '/requests' },
-    { name: 'History', path: '/history' },
+    { name: 'My Items', path: '/user/items' },
     { name: 'Profile', path: '/profile' },
   ];
 
@@ -203,9 +202,6 @@ const UserHeader = () => {
             )}
 
             <div className="hidden lg:flex items-center space-x-4">
-              <button type="button" className="p-1.5 text-white hover:scale-110 transition-transform duration-200">
-                <Search className="w-5 h-5" strokeWidth={2.0} />
-              </button>
               
               {/* Profile Menu Button */}
               <div className="relative" ref={profileMenuRef}>
