@@ -89,7 +89,7 @@ const Header = () => {
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
       localStorage.removeItem('registeredEmail');
-      navigate('/admin/login');
+      navigate('/');
     }
   };
 

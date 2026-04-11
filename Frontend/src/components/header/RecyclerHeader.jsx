@@ -54,7 +54,7 @@ const RecyclerHeader = () => {
     setAuthToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    navigate('/login');
+    navigate('/');
   };
 
   return (
