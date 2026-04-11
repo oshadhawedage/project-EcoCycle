@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 
 // Landing Page
 import LandingPage from './pages/landing/LandingPage';
@@ -50,8 +51,9 @@ import RecyclerPickupsPage from "./pages/pickups/RecyclerPickupsPage"; // recycl
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <AuthProvider>
+      <Router>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
 
         {/* ================= USER AUTH ROUTES ================= */}
@@ -103,6 +105,7 @@ function App() {
 
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 
