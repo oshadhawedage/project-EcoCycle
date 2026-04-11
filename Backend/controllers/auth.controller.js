@@ -13,7 +13,7 @@ import { sendEmail } from "../utils/email.js";
  */
 export const register = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, phone, street, city, district, province, postalCode } = req.body;
 
     if (!fullName || !email || !password)
       return res.status(400).json({ message: "fullName, email, password are required" });
@@ -29,7 +29,16 @@ export const register = async (req, res, next) => {
       email: email.toLowerCase(),
       passwordHash,
       role: "USER",
-      isEmailVerified: false
+      isEmailVerified: false,
+      phone: phone || "",
+      address: {
+        street: street || "",
+        city: city || "",
+        district: district || "",
+        province: province || "",
+        postalCode: postalCode || "",
+        country: "Sri Lanka"
+      }
     });
 
     // OTP for email verification
