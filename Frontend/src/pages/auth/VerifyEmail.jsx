@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, AlertCircle, CheckCircle, Loader, Clock } from 'lucide-react';
-import API from '../../services/api';
+import API, { setAuthToken } from '../../services/api';
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
@@ -78,14 +78,23 @@ const VerifyEmail = () => {
         otp: otpValue,
       });
 
-      setSuccessMessage('Email verified successfully! Redirecting to login...');
+      setSuccessMessage('Email verified successfully! Redirecting to dashboard...');
+      
+      // Store token and user data
+      if (response.data.token) {
+        setAuthToken(response.data.token);
+      }
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('userRole', response.data.user.role);
+      }
       
       // Clear stored email
       localStorage.removeItem('registeredEmail');
 
-      // Redirect to login after 2 seconds
+      // Redirect to user dashboard after 2 seconds
       setTimeout(() => {
-        navigate('/login');
+        navigate('/user/dashboard');
       }, 2000);
     } catch (err) {
       const message = err.response?.data?.message || 'OTP verification failed. Please try again.';

@@ -33,7 +33,7 @@ const UserHeader = () => {
       setAuthToken(null);
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
-      navigate('/login');
+      navigate('/');
     }
   };
 
