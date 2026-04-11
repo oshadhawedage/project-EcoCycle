@@ -1,6 +1,7 @@
 import PickupRequest from "../models/pickupRequestModel.js";
 import { sendStatusEmail } from "../services/emailService.js";
 import EwasteItem from "../models/EwasteItem.js";
+import User from "../models/User.model.js"; // ✅ ADD THIS
 
 // 🔥 NEW IMPORTS
 import ImpactLog from "../models/ImpactLog.js";
@@ -15,46 +16,84 @@ const getOrCreateSettings = async () => {
 };
 
 
-// CREATE request (Customer)
+// CREATE request (AUTO from ewaste item)
 export const createRequest = async (req, res) => {
   try {
-    const { ewasteItemId, quantity, address, preferredDate } = req.body;
+    const { ewasteItemId, quantity, preferredDate } = req.body;
 
     const userId = req.user._id;
-    const email = req.user.email;
 
-    if (!ewasteItemId || !quantity || !address || !preferredDate) {
-      return res.status(400).json({ message: "All fields are required" });
+    // 🔹 Get user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
+    // 🔹 Get ewaste item
     const item = await EwasteItem.findById(ewasteItemId);
-    if (!item) return res.status(404).json({ message: "E-waste item not found" });
+    if (!item) {
+      return res.status(404).json({ message: "E-waste item not found" });
+    }
 
+    // 🔥 Decide address
+    let finalAddress = "";
+
+    if (item.useProfileAddress) {
+      const addr = user.address || {};
+      finalAddress = `${addr.street}, ${addr.city}, ${addr.district}, ${addr.province}, ${addr.country}`;
+    } else {
+      finalAddress = item.pickupAddress;
+    }
+
+    if (!finalAddress || finalAddress.trim() === "") {
+      return res.status(400).json({ message: "Pickup address not available" });
+    }
+
+    // 🔹 Create pickup request
     const request = await PickupRequest.create({
       userId,
-      email,
-      ewasteItemId,
+      email: user.email,
+       userName: user.fullName, // ✅ ADD THIS
+      ewasteItemId: item._id,
       itemName: `${item.brand} ${item.deviceType}`,
-      quantity,
-      address,
-      preferredDate,
+      quantity: quantity || 1,
+      address: finalAddress,
+      preferredDate: preferredDate || new Date(),
       status: "Pending",
     });
 
-    return res.status(201).json(request);
+    // 🔹 Update item status (important)
+    item.status = "requested";
+    await item.save();
 
+    return res.status(201).json(request);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
 
 
-// GET all requests (Recycler/Admin)
 export const getAllRequests = async (req, res) => {
   try {
-    const requests = await PickupRequest.find().sort({ createdAt: -1 });
-    return res.json(requests);
+    const userId = req.user._id;
+    const role = req.user.role;
 
+    let requests = [];
+
+    if (role === "ADMIN") {
+      requests = await PickupRequest.find().sort({ createdAt: -1 });
+    } else if (role === "RECYCLER") {
+      requests = await PickupRequest.find({
+        $or: [
+          { status: "Pending", recyclerId: null },
+          { recyclerId: userId.toString() },
+        ],
+      }).sort({ createdAt: -1 });
+    } else {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    return res.json(requests);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -83,7 +122,7 @@ export const acceptRequest = async (req, res) => {
     const request = await PickupRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: "Not found" });
 
-    if (request.recyclerId) {
+    if (request.status !== "Pending" || request.recyclerId) {
       return res.status(400).json({ message: "Request already accepted" });
     }
 

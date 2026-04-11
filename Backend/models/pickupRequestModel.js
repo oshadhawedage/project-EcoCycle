@@ -19,6 +19,13 @@ const pickupRequestSchema = new mongoose.Schema(
       lowercase: true,
     },
 
+    // Customer name (for display to recycler)
+    userName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     // Related E-waste item id (from EwasteItem component)
     // This connects pickupRequest component with the E-waste item management component
     ewasteItemId: {

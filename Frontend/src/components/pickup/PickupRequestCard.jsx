@@ -45,7 +45,14 @@ const PickupRequestCard = ({ request, selected, onClick }) => {
 
         <div className="flex items-center gap-2">
           <UserRound className="w-4 h-4 text-[#0f55a7]" />
-          <span>{request.email}</span>
+          <div className="flex flex-col">
+            <span className="font-medium text-slate-700">
+              {request.userName}
+            </span>
+            <span className="text-xs text-slate-400">
+              {request.email}
+            </span>
+          </div>
         </div>
       </div>
     </button>
