@@ -10,6 +10,7 @@ import pickupRoutes from "./routes/pickupRequestRoutes.js";
 import impactLogRoutes from "./routes/impactLogRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import holidayRoutes from "./routes/holidayRoutes.js";
 
 import usersRoutes from "./routes/users.js";        //megha 
 import adminRoutes from "./routes/admin.js";        //megha
@@ -61,7 +62,7 @@ app.use((err, req, res, next) => {
 });
 
 // Port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5050;
 
 // Routes
 app.use("/api/ewaste", ewasteRoutes);
@@ -69,6 +70,7 @@ app.use("/api/pickups", pickupRoutes);
 app.use("/api/impact-logs", impactLogRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/holidays", holidayRoutes);
 app.use("/api/users", usersRoutes);           //megha
 app.use("/api/admin", adminRoutes);           //megha
 
