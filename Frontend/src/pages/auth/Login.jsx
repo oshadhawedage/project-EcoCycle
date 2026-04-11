@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { Eye, EyeOff, Loader } from 'lucide-react';
 import API, { setAuthToken } from '../../services/api';
 
 const Login = () => {
@@ -119,51 +119,124 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-12">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-cyan-900 flex items-center justify-center px-4 py-12">
+      {/* Main Container */}
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          
+          {/* Left Side - Content & Benefits */}
+          <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-emerald-600 via-emerald-700 to-cyan-700 p-12 text-white">
+            <div>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-300 to-cyan-300 rounded-lg"></div>
+                </div>
+                <h2 className="text-2xl font-bold">EcoCycle</h2>
+              </div>
+              
+              <h3 className="text-4xl font-bold leading-tight mb-6">
+                Welcome Back, Eco Warrior
+              </h3>
+              
+              <p className="text-emerald-100 text-lg mb-10 leading-relaxed">
+                Continue your mission to reduce e-waste and make a positive environmental impact with our community.
+              </p>
 
-      {/* Login Card */}
-      <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] px-8 py-8 text-center">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-blue-100 text-sm">Sign in to your EcoCycle account</p>
+              {/* Benefits List */}
+              <div className="space-y-6">
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-emerald-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">View Your Impact</h4>
+                    <p className="text-emerald-100 text-sm">See your e-waste recycling progress and achievements</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-emerald-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Manage Pickups</h4>
+                    <p className="text-emerald-100 text-sm">Schedule and track your e-waste pickups easily</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-emerald-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Check Rewards</h4>
+                    <p className="text-emerald-100 text-sm">Access your earned points and special benefits</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-5 h-5 text-emerald-200" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Community Connect</h4>
+                    <p className="text-emerald-100 text-sm">Stay connected with fellow eco-conscious members</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Stats */}
+            <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
+              <div>
+                <div className="text-2xl font-bold">50K+</div>
+                <p className="text-sm text-emerald-100">Active Users</p>
+              </div>
+              <div>
+                <div className="text-2xl font-bold">5K+</div>
+                <p className="text-sm text-emerald-100">E-waste Recycled</p>
+              </div>
+              <div>
+                <div className="text-2xl font-bold">100%</div>
+                <p className="text-sm text-emerald-100">Eco-Friendly</p>
+              </div>
+            </div>
           </div>
 
-          {/* Form Container */}
-          <div className="px-8 py-8">
-            {/* Success Message */}
+          {/* Right Side - Login Form */}
+          <div className="p-12">
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+              <p className="text-gray-600">Sign in to your EcoCycle account</p>
+            </div>
+
+            {/* Messages */}
             {successMessage && (
-              <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <p className="text-green-700 text-sm font-medium">{successMessage}</p>
-                </div>
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-800 text-sm font-medium">{successMessage}</p>
               </div>
             )}
 
-            {/* Error Message */}
             {errorMessage && (
-              <div className={`mb-6 border-l-4 p-4 rounded ${
+              <div className={`mb-6 p-4 border rounded-lg ${
                 accountLocked
-                  ? 'bg-orange-50 border-orange-500'
-                  : 'bg-red-50 border-red-500'
+                  ? 'bg-orange-50 border-orange-200'
+                  : 'bg-red-50 border-red-200'
               }`}>
-                <div className="flex items-center gap-3">
-                  <AlertCircle className={`w-5 h-5 ${
-                    accountLocked ? 'text-orange-500' : 'text-red-500'
-                  }`} />
-                  <p className={`text-sm font-medium ${
-                    accountLocked ? 'text-orange-700' : 'text-red-700'
-                  }`}>
-                    {errorMessage}
-                  </p>
-                </div>
+                <p className={`text-sm font-medium ${
+                  accountLocked ? 'text-orange-800' : 'text-red-800'
+                }`}>
+                  {errorMessage}
+                </p>
               </div>
             )}
 
@@ -171,7 +244,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email Field */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Email Address
                 </label>
                 <input
@@ -180,26 +253,26 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none ${
+                  className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0 ${
                     errors.email
-                      ? 'border-red-500 focus:border-red-600 bg-red-50'
-                      : 'border-slate-200 focus:border-blue-500 bg-slate-50'
+                      ? 'border-red-300 bg-red-50 focus:ring-red-500 text-gray-900'
+                      : 'border-emerald-300 bg-white focus:ring-emerald-500 text-gray-900 border-opacity-50'
                   }`}
                 />
                 {errors.email && (
-                  <p className="text-red-600 text-xs font-medium mt-1">{errors.email}</p>
+                  <p className="text-red-600 text-xs font-medium mt-1.5">{errors.email}</p>
                 )}
               </div>
 
               {/* Password Field */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-semibold text-slate-700">
+                  <label className="block text-sm font-semibold text-gray-900">
                     Password
                   </label>
                   <Link
                     to="/forgot-password"
-                    className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
+                    className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
                   >
                     Forgot?
                   </Link>
@@ -211,26 +284,26 @@ const Login = () => {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••••"
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-colors focus:outline-none pr-10 ${
+                    className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0 pr-10 ${
                       errors.password
-                        ? 'border-red-500 focus:border-red-600 bg-red-50'
-                        : 'border-slate-200 focus:border-blue-500 bg-slate-50'
+                        ? 'border-red-300 bg-red-50 focus:ring-red-500 text-gray-900'
+                        : 'border-emerald-300 bg-white focus:ring-emerald-500 text-gray-900 border-opacity-50'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-slate-500 hover:text-slate-700 transition-colors"
+                    className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff className="w-4 h-4" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-4 h-4" />
                     )}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red-600 text-xs font-medium mt-1">{errors.password}</p>
+                  <p className="text-red-600 text-xs font-medium mt-1.5">{errors.password}</p>
                 )}
               </div>
 
@@ -242,11 +315,11 @@ const Login = () => {
                   name="rememberMe"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-2 focus:ring-emerald-500"
                 />
                 <label
                   htmlFor="rememberMe"
-                  className="ml-2 text-sm text-slate-600 cursor-pointer hover:text-slate-700"
+                  className="ml-2 text-sm text-gray-600 cursor-pointer hover:text-gray-700"
                 >
                   Remember me
                 </label>
@@ -256,11 +329,11 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors mt-8 text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
-                    <Loader className="w-5 h-5 animate-spin" />
+                    <Loader className="w-4 h-4 animate-spin" />
                     Signing In...
                   </>
                 ) : (
@@ -269,45 +342,30 @@ const Login = () => {
               </button>
             </form>
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">Don't have an account?</span>
-              </div>
+            {/* Create Account Link */}
+            <div className="mt-8 text-center">
+              <p className="text-gray-600 text-sm">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+                  Create Account
+                </Link>
+              </p>
             </div>
 
-            {/* Register Link */}
-            <Link
-              to="/register"
-              className="w-full block text-center bg-slate-100 text-slate-700 font-semibold py-3 rounded-lg hover:bg-slate-200 transition-colors"
-            >
-              Create Account
-            </Link>
+            {/* Footer */}
+            <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+              <p>
+                By signing in, you agree to our{' '}
+                <a href="#" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+                  Terms of Service
+                </a>
+                {' and '}
+                <a href="#" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+                  Privacy Policy
+                </a>
+              </p>
+            </div>
           </div>
-
-          {/* Footer */}
-          <div className="bg-slate-50 px-8 py-4 text-center border-t border-slate-100">
-            <p className="text-xs text-slate-600">
-              This site is protected by reCAPTCHA and the Google{' '}
-              <a href="#" className="text-blue-600 hover:underline">
-                Privacy Policy
-              </a>
-            </p>
-          </div>
-        </div>
-
-        {/* Legal Links */}
-        <div className="text-center mt-6">
-          <a href="#" className="text-white/60 hover:text-white text-xs transition-colors">
-            Privacy Policy
-          </a>
-          <span className="text-white/30 mx-2">•</span>
-          <a href="#" className="text-white/60 hover:text-white text-xs transition-colors">
-            Support
-          </a>
         </div>
       </div>
     </div>
