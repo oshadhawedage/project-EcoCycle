@@ -35,6 +35,35 @@ const RESET_BENEFITS = [
   },
 ];
 
+// Password validation helper function
+const validatePassword = (password) => {
+  const requirements = {
+    minLength: password.length >= 6,
+    hasLowercase: /[a-z]/.test(password),
+    hasUppercase: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+
+  const allRequirementsMet = Object.values(requirements).every(req => req);
+
+  if (!allRequirementsMet) {
+    const missingRequirements = [];
+    if (!requirements.minLength) missingRequirements.push('at least 6 characters');
+    if (!requirements.hasLowercase) missingRequirements.push('a lowercase letter');
+    if (!requirements.hasUppercase) missingRequirements.push('an uppercase letter');
+    if (!requirements.hasNumber) missingRequirements.push('a number');
+    if (!requirements.hasSpecialChar) missingRequirements.push('a special character');
+
+    return {
+      isValid: false,
+      message: `Password must contain: ${missingRequirements.join(', ')}`,
+    };
+  }
+
+  return { isValid: true, message: '' };
+};
+
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // Step 1: Email, Step 2: OTP, Step 3: Reset Password
@@ -123,8 +152,14 @@ const ForgotPassword = () => {
     setSuccessMessage('');
 
     const newErrors = {};
-    if (!password) newErrors.password = 'Password is required';
-    else if (password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else {
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        newErrors.password = passwordValidation.message;
+      }
+    }
 
     if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
     else if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
