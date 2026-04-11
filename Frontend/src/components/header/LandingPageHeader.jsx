@@ -1,179 +1,184 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Search, Menu, X } from 'lucide-react';
+import myLogo from '../../assets/logo03.png';
 
 const LandingPageHeader = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'How It Works', path: '/#how-it-works' },
+    { name: 'Services', path: '/#services' },
+    { name: 'Impact', path: '/#impact' },
+    { name: 'About Us', path: '/#about' },
+    { name: 'Contact', path: '/#contact' },
+  ];
+
+  // ✅ Fix: proper useEffect usage (no error now)
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled
-        ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100'
-        : 'bg-white/90 backdrop-blur-sm'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          {/* Enhanced Logo */}
-          <div className="flex items-center space-x-3">
-            <Link to="/" className="flex items-center space-x-3 no-underline group">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                <span className="text-white text-xl font-bold">♻️</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">EcoCycle</h1>
-                <p className="text-xs text-gray-500 -mt-1">E-Waste Solutions</p>
-              </div>
+    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f55a7] from-50% to-[#4db848] shadow-md">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 md:h-16">
+
+          {/* Logo */}
+          <div className="flex-1 flex justify-start">
+            <Link to="/" className="flex items-center space-x-2 group">
+              <img
+                src={myLogo}
+                alt="EcoCycle Logo"
+                className="h-6 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              />
             </Link>
           </div>
 
-          {/* Enhanced Navigation - Desktop */}
-          <nav className="hidden lg:flex">
-            <ul className="flex list-none gap-1 m-0 p-0">
-              <li>
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex flex-1 justify-center">
+            <nav className="flex items-center space-x-6 xl:space-x-8">
+              {navLinks.map((link) => (
                 <a
-                  href="#features"
-                  className="relative px-4 py-2 text-gray-700 font-medium hover:text-green-600 transition-all duration-300 rounded-lg hover:bg-green-50 group"
+                  key={link.name}
+                  href={link.path}
+                  className="relative text-[15px] font-[300] tracking-wide py-1 border-b-2 border-transparent text-white/90 hover:border-white hover:text-white transition-all duration-200 whitespace-nowrap"
                 >
-                  Features
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
-                  <span className="absolute bottom-0 right-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
+                  {link.name}
                 </a>
-              </li>
-              <li>
-                <a
-                  href="#how-it-works"
-                  className="relative px-4 py-2 text-gray-700 font-medium hover:text-green-600 transition-all duration-300 rounded-lg hover:bg-green-50 group"
-                >
-                  How It Works
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
-                  <span className="absolute bottom-0 right-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#about"
-                  className="relative px-4 py-2 text-gray-700 font-medium hover:text-green-600 transition-all duration-300 rounded-lg hover:bg-green-50 group"
-                >
-                  About
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
-                  <span className="absolute bottom-0 right-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#contact"
-                  className="relative px-4 py-2 text-gray-700 font-medium hover:text-green-600 transition-all duration-300 rounded-lg hover:bg-green-50 group"
-                >
-                  Contact
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
-                  <span className="absolute bottom-0 right-1/2 w-0 h-0.5 bg-green-600 group-hover:w-1/2 transition-all duration-300"></span>
-                </a>
-              </li>
-            </ul>
-          </nav>
-
-          {/* Enhanced Auth Buttons - Desktop */}
-          <div className="hidden lg:flex gap-3 items-center">
-            <Link
-              to="/login"
-              className="text-gray-700 font-medium px-6 py-2.5 border-2 border-gray-200 rounded-xl hover:border-green-300 hover:text-green-600 hover:bg-green-50 transition-all duration-300 no-underline"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              className="text-white font-medium px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 border-2 border-green-500 rounded-xl hover:from-green-600 hover:to-green-700 hover:border-green-600 hover:shadow-lg transition-all duration-300 no-underline transform hover:-translate-y-0.5"
-            >
-              Get Started
-            </Link>
+              ))}
+            </nav>
           </div>
 
-          {/* Enhanced Mobile Menu Toggle */}
-          <button
-            className="lg:hidden flex flex-col gap-1.5 bg-none border-none cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-          >
-            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-          </button>
+          {/* Right Side */}
+          <div className="flex-1 flex justify-end items-center gap-4">
+
+            {/* Search */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <div className="flex items-center">
+                <div
+                  className={`overflow-hidden transition-all duration-300 flex items-center bg-white/10 rounded-full ${
+                    isSearchOpen
+                      ? 'w-48 px-4 py-1.5 opacity-100 mr-2 border border-white/20'
+                      : 'w-0 opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    autoFocus={isSearchOpen}
+                    className="w-full bg-transparent text-white text-[15px] focus:outline-none placeholder:text-white/60"
+                  />
+                </div>
+
+                <button
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  className="p-1.5 text-white hover:scale-110 transition-transform duration-200"
+                >
+                  {isSearchOpen ? (
+                    <X className="w-5 h-5" />
+                  ) : (
+                    <Search className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+
+              {/* Login + Signup */}
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/login"
+                  className="px-4 py-1.5 text-sm font-medium text-white border border-white/40 rounded-full hover:bg-white/10 transition"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="px-4 py-1.5 text-sm font-medium text-[#0f55a7] bg-white rounded-full hover:bg-gray-100 transition"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            </div>
+
+            {/* Mobile Toggle */}
+            <div className="lg:hidden flex items-center">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-white hover:bg-white/10 rounded-xl transition-colors"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-7 h-7" />
+                ) : (
+                  <Menu className="w-7 h-7" />
+                )}
+              </button>
+            </div>
+
+          </div>
         </div>
       </div>
 
-      {/* Enhanced Mobile Menu */}
-      <div className={`lg:hidden absolute top-full left-0 right-0 w-full bg-white/95 backdrop-blur-md shadow-xl border-t border-gray-100 transition-all duration-300 ${
-        menuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-      }`}>
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <ul className="flex flex-col list-none gap-2 m-0 p-0">
-            <li>
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-[#004d99] border-t border-white/10 shadow-xl absolute w-full left-0">
+          <div className="px-6 py-6 space-y-2">
+
+            {/* Search */}
+            <div className="mb-4">
+              <div className="flex items-center bg-white/10 rounded-lg px-3 py-2 border border-white/20">
+                <Search className="w-4 h-4 text-white/70 mr-2" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full bg-transparent text-white text-[15px] focus:outline-none placeholder:text-white/50"
+                />
+              </div>
+            </div>
+
+            {/* Nav Links */}
+            {navLinks.map((link) => (
               <a
-                href="#features"
-                className="block px-4 py-3 text-gray-700 font-medium hover:text-green-600 hover:bg-green-50 transition-all duration-300 rounded-lg"
-                onClick={() => setMenuOpen(false)}
+                key={link.name}
+                href={link.path}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-3 rounded-lg text-[15px] text-white/90 hover:bg-white/10 hover:text-white transition"
               >
-                ✨ Features
+                {link.name}
               </a>
-            </li>
-            <li>
-              <a
-                href="#how-it-works"
-                className="block px-4 py-3 text-gray-700 font-medium hover:text-green-600 hover:bg-green-50 transition-all duration-300 rounded-lg"
-                onClick={() => setMenuOpen(false)}
+            ))}
+
+            {/* Mobile Login/Signup */}
+            <div className="mt-4 pt-4 border-t border-white/10 flex flex-col gap-3">
+              <Link
+                to="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full text-center px-4 py-2 text-white border border-white/40 rounded-lg hover:bg-white/10 transition"
               >
-                🚀 How It Works
-              </a>
-            </li>
-            <li>
-              <a
-                href="#about"
-                className="block px-4 py-3 text-gray-700 font-medium hover:text-green-600 hover:bg-green-50 transition-all duration-300 rounded-lg"
-                onClick={() => setMenuOpen(false)}
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full text-center px-4 py-2 bg-white text-[#0f55a7] rounded-lg hover:bg-gray-100 transition"
               >
-                📖 About
-              </a>
-            </li>
-            <li>
-              <a
-                href="#contact"
-                className="block px-4 py-3 text-gray-700 font-medium hover:text-green-600 hover:bg-green-50 transition-all duration-300 rounded-lg"
-                onClick={() => setMenuOpen(false)}
-              >
-                📞 Contact
-              </a>
-            </li>
-          </ul>
-          <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-gray-200">
-            <Link
-              to="/login"
-              className="text-center text-gray-700 font-medium px-6 py-3 border-2 border-gray-200 rounded-xl hover:border-green-300 hover:text-green-600 hover:bg-green-50 transition-all duration-300 no-underline"
-              onClick={() => setMenuOpen(false)}
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              className="text-center text-white font-medium px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 border-2 border-green-500 rounded-xl hover:from-green-600 hover:to-green-700 hover:shadow-lg transition-all duration-300 no-underline"
-              onClick={() => setMenuOpen(false)}
-            >
-              Get Started Free
-            </Link>
+                Sign Up
+              </Link>
+            </div>
+
           </div>
-        </nav>
-      </div>
+        </div>
+      )}
     </header>
   );
 };
