@@ -7,6 +7,35 @@ import {
 import API from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
+// Password validation helper function
+const validatePassword = (password) => {
+  const requirements = {
+    minLength: password.length >= 6,
+    hasLowercase: /[a-z]/.test(password),
+    hasUppercase: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+
+  const allRequirementsMet = Object.values(requirements).every(req => req);
+
+  if (!allRequirementsMet) {
+    const missingRequirements = [];
+    if (!requirements.minLength) missingRequirements.push('at least 6 characters');
+    if (!requirements.hasLowercase) missingRequirements.push('a lowercase letter');
+    if (!requirements.hasUppercase) missingRequirements.push('an uppercase letter');
+    if (!requirements.hasNumber) missingRequirements.push('a number');
+    if (!requirements.hasSpecialChar) missingRequirements.push('a special character');
+
+    return {
+      isValid: false,
+      message: `Password must contain: ${missingRequirements.join(', ')}`,
+    };
+  }
+
+  return { isValid: true, message: '' };
+};
+
 const UserProfile = () => {
   const navigate = useNavigate();
   const { logout, updateUser } = useAuth();
@@ -93,8 +122,9 @@ const UserProfile = () => {
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      setMessage('❌ Password must be at least 6 characters');
+    const passwordValidation = validatePassword(passwordForm.newPassword);
+    if (!passwordValidation.isValid) {
+      setMessage(`❌ ${passwordValidation.message}`);
       return;
     }
 
