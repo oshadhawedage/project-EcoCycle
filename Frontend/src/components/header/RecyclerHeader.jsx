@@ -2,23 +2,16 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, Settings, LogOut, Home } from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
-import { setAuthToken } from '../../services/api';
+import API from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const RecyclerHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
-
-  // Get user from localStorage
-  const currentUser = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('user') || 'null');
-    } catch {
-      return null;
-    }
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -51,9 +44,7 @@ const RecyclerHeader = () => {
 
   // Sign out logic
   const handleSignOut = () => {
-    setAuthToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    logout();
     navigate('/');
   };
 
@@ -102,7 +93,7 @@ const RecyclerHeader = () => {
                 onClick={() => setIsProfileMenuOpen((prev) => !prev)}
                 className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white font-semibold"
               >
-                {currentUser?.fullName?.charAt(0) || 'R'}
+                {user?.fullName?.charAt(0) || 'R'}
               </button>
 
               {/* DROPDOWN MENU */}
@@ -112,10 +103,10 @@ const RecyclerHeader = () => {
                   {/* USER INFO */}
                   <div className="px-4 py-4 bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white">
                     <p className="font-semibold text-sm">
-                      {currentUser?.fullName || 'Recycler'}
+                      {user?.fullName || 'Recycler'}
                     </p>
                     <p className="text-xs text-white/80">
-                      {currentUser?.email || 'recycler@email.com'}
+                      {user?.email || 'recycler@email.com'}
                     </p>
                   </div>
 
