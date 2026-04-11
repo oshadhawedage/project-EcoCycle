@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, AlertCircle, CheckCircle, Loader, Clock } from 'lucide-react';
-import API, { setAuthToken } from '../../../services/api';
+import API from '../../../services/api';
+import { useAuth } from '../../../context/AuthContext';
 
 const AdminVerifyEmail = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -80,13 +82,9 @@ const AdminVerifyEmail = () => {
 
       setSuccessMessage('Email verified successfully! Redirecting to dashboard...');
       
-      // Store token and user data
-      if (response.data.token) {
-        setAuthToken(response.data.token);
-      }
-      if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        localStorage.setItem('userRole', response.data.user.role);
+      // Store token and user data using context
+      if (response.data.token && response.data.user) {
+        login(response.data.user, response.data.token);
       }
       
       // Clear stored email
