@@ -1,13 +1,6 @@
 //PickupRequestDetails.jsx
 import React, { useMemo } from "react";
-import {
-  CalendarDays,
-  Clock3,
-  Mail,
-  MapPin,
-  Package,
-  CheckCircle2,
-  Truck,
+import {CalendarDays, Clock3, Mail, MapPin, Package, CheckCircle2, Truck, UserRound, Hash
 } from "lucide-react";
 import PickupStatusBadge from "./PickupStatusBadge";
 
@@ -102,6 +95,15 @@ const PickupRequestDetails = ({
             </h3>
 
             <div className="space-y-4 text-sm text-slate-700">
+              <div className="flex items-center gap-2">
+                <Hash className="w-4 h-4 text-[#0f55a7]" />
+                <span>Request ID: {request._id}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <UserRound className="w-4 h-4 text-[#0f55a7]" />
+                <span>{request.userName}</span>
+              </div>
               <div className="flex items-center gap-3">
                 <Package className="w-4 h-4 text-[#0f55a7]" />
                 <span><strong>Quantity:</strong> {request.quantity}</span>
@@ -150,26 +152,26 @@ const PickupRequestDetails = ({
             </h3>
 
             {/* Pending → Accept */}
-{mode === "pending" && request.status === "Pending" && (
-  <button
-    onClick={() => onAccept(request._id)}
-    disabled={accepting}
-    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-[#0f55a7] to-[#4db848] hover:opacity-95 transition disabled:opacity-60"
-  >
-    <Truck className="w-4 h-4" />
-    {accepting ? "Accepting..." : "Accept Request"}
-  </button>
-)}
+            {mode === "pending" && request.status === "Pending" && (
+              <button
+                onClick={() => onAccept(request._id)}
+                disabled={accepting}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-[#0f55a7] to-[#4db848] hover:opacity-95 transition disabled:opacity-60"
+              >
+                <Truck className="w-4 h-4" />
+                {accepting ? "Accepting..." : "Accept Request"}
+              </button>
+            )}
 
             {/* Accepted → Collected */}
             {mode === "accepted" && request.status === "Accepted" && (
               <button
                 onClick={() => onUpdateStatus(request._id, "Collected")}
                 disabled={updating}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-[#0f55a7] to-[#4db848] hover:opacity-95 transition disabled:opacity-60"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {updating ? "Updating..." : "Mark as Collected"}
+                {updating ? "Updating..." : "Collected"}
               </button>
             )}
 
@@ -178,10 +180,10 @@ const PickupRequestDetails = ({
               <button
                 onClick={() => onUpdateStatus(request._id, "Completed")}
                 disabled={updating}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-[#0f55a7] to-[#4db848] hover:opacity-95 transition disabled:opacity-60"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {updating ? "Updating..." : "Mark as Completed"}
+                {updating ? "Updating..." : "Completed"}
               </button>
             )}
 

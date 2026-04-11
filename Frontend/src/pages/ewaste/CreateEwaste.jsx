@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createEwasteItem } from "../../services/api";
+import { createEwasteItem, createPickupRequest  } from "../../services/api";
 
 const CreateEwaste = () => {
   const navigate = useNavigate();
@@ -43,7 +43,13 @@ const CreateEwaste = () => {
         pickupAddress: useProfileAddress ? null : pickupAddress,
       };
 
-      await createEwasteItem(payload);
+      const res = await createEwasteItem(payload);
+
+      // 🔥 AUTO create pickup request
+      await createPickupRequest({
+        ewasteItemId: res.data._id,
+        quantity: 1,
+      });
 
       alert("E-Waste item created successfully!");
       navigate("/user/dashboard");
