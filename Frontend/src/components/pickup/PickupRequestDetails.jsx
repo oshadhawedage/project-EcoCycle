@@ -34,6 +34,54 @@ const PickupRequestDetails = ({
     );
   }
 
+  // Function to open Google Maps with the request address
+  const handleOpenMap = () => {
+  const destination = encodeURIComponent(request.address);
+
+  if (!navigator.geolocation) {
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${destination}`,
+      "_blank"
+    );
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+
+      const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${destination}&travelmode=driving`;
+
+      window.open(url, "_blank");
+    },
+    (error) => {
+      console.error("Geolocation error:", error);
+
+      let message = "Unable to retrieve your location.";
+
+      if (error.code === 1) {
+        message = "Location permission denied. Opening destination only.";
+      } else if (error.code === 2) {
+        message = "Location unavailable. Opening destination only.";
+      } else if (error.code === 3) {
+        message = "Location request timed out. Opening destination only.";
+      }
+
+      alert(message);
+
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${destination}`,
+        "_blank"
+      );
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+};
+
   return (
     <div className="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden">
       <div className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] px-6 py-5 text-white">
@@ -84,6 +132,15 @@ const PickupRequestDetails = ({
                   {new Date(request.createdAt).toLocaleString()}
                 </span>
               </div>
+            </div>
+
+            {/* View Location Button */}
+            <div className="mt-5">
+              <button onClick={handleOpenMap}
+              className="w-full px-5 py-3 rounded-xl border border-[#0f55a7] text-[#0f55a7] hover:bg-[#0f55a7]/10 transition font-medium"
+              >
+                View Location
+              </button>
             </div>
           </div>
 
