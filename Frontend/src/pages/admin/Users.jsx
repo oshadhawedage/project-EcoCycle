@@ -29,8 +29,8 @@ const UserManagement = () => {
       setLoading(true);
       try {
         // Check authorization
-        const userRes = await API.get('/users/me');
-        if (userRes.data.user.role !== 'ADMIN') {
+        const userRes = await API.get('/admin/me');
+        if (userRes.data.admin.role !== 'ADMIN') {
           setIsAuthorized(false);
           setMessage('❌ Access denied. Only admins can access this page.');
           setTimeout(() => navigate('/admin/login'), 2000);

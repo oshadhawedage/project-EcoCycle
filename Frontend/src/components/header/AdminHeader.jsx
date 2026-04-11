@@ -87,7 +87,7 @@ const Header = () => {
     } finally {
       setIsProfileMenuOpen(false);
       logout();
-      navigate('/');
+      navigate('/admin/login');
     }
   };
 
