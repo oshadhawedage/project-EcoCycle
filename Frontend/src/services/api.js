@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API = axios.create({
   // Configure via Vite env var if needed, otherwise default to backend's typical dev port.
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050/api',
 });
 
 // Optional dev override (avoid hard-coding secrets in source): set `VITE_DEV_TOKEN` if you need one.
@@ -65,10 +65,20 @@ export const getUserProfile = () => API.get('/users/me');
 export const userLogout = () => API.post('/users/logout');
 
 // ================= ANALYTICS APIs =================
-export const getOverview = () => API.get('/analytics/overview');
-export const getMonthlyTrend = () => API.get('/analytics/monthly-trend?months=6');
+export const getOverview = (period = 'all_time') =>
+  API.get(`/analytics/overview?period=${period}`);
+export const getMonthlyTrend = (months = 6) =>
+  API.get(`/analytics/monthly-trend?months=${months}`);
 export const getCategoryDistribution = () => API.get('/analytics/category-distribution');
 export const getLeaderboard = () => API.get('/analytics/leaderboard?limit=5');
+export const getSriLankaHolidays = (year, month) =>
+  API.get(`/holidays?year=${year}${month ? `&month=${month}` : ""}`);
+
+export const getNextSriLankaHoliday = () =>
+  API.get("/holidays/next");
+
+export const getHolidayComparison = (year = new Date().getFullYear()) =>
+  API.get(`/analytics/holiday-comparison?year=${year}`);
 
 // ================= IMPACT LOGS & SETTINGS APIs =================
 export const getImpactLogs = (filters = {}) => API.get('/impact-logs', { params: filters });

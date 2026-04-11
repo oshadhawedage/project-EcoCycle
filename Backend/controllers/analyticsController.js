@@ -1,3 +1,4 @@
+import axios from "axios";
 import ImpactLog from "../models/ImpactLog.js";
 import Settings from "../models/Settings.js";
 
@@ -275,6 +276,101 @@ export const getLeaderboard = async (req, res) => {
         actionsCount: x.actionsCount,
       }))
     );
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// GET /api/analytics/holiday-comparison?year=2026
+export const getHolidayComparison = async (req, res) => {
+  try {
+    const apiKey = process.env.CALENDARIFIC_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({ message: "Missing Calendarific API key" });
+    }
+
+    const isAdmin = req.user.role === "ADMIN";
+    const matchStage = isAdmin ? {} : { userId: req.user._id.toString() };
+
+    const year = Number(req.query.year) || new Date().getFullYear();
+
+    const holidayResponse = await axios.get("https://calendarific.com/api/v2/holidays", {
+      params: {
+        api_key: apiKey,
+        country: "LK",
+        year,
+      },
+    });
+
+    const holidays = holidayResponse.data?.response?.holidays || [];
+
+    const holidayDateSet = new Set(
+      holidays
+        .map((holiday) => holiday.date?.iso?.split("T")[0])
+        .filter(Boolean)
+    );
+
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year + 1, 0, 1);
+
+    const logs = await ImpactLog.find({
+      ...matchStage,
+      createdAt: { $gte: yearStart, $lt: yearEnd },
+    });
+
+    let holidayWeightKg = 0;
+    let nonHolidayWeightKg = 0;
+    let holidayActions = 0;
+    let nonHolidayActions = 0;
+
+    const holidayDaysSeen = new Set();
+    const nonHolidayDaysSeen = new Set();
+
+    for (const log of logs) {
+      const dateKey = new Date(log.createdAt).toISOString().split("T")[0];
+      const weight = Number(log.weightKg) || 0;
+
+      if (holidayDateSet.has(dateKey)) {
+        holidayWeightKg += weight;
+        holidayActions += 1;
+        holidayDaysSeen.add(dateKey);
+      } else {
+        nonHolidayWeightKg += weight;
+        nonHolidayActions += 1;
+        nonHolidayDaysSeen.add(dateKey);
+      }
+    }
+
+    const holidayActiveDays = holidayDaysSeen.size;
+    const nonHolidayActiveDays = nonHolidayDaysSeen.size;
+
+    const holidayAvgWeightPerActiveDay =
+      holidayActiveDays > 0 ? holidayWeightKg / holidayActiveDays : 0;
+
+    const nonHolidayAvgWeightPerActiveDay =
+      nonHolidayActiveDays > 0 ? nonHolidayWeightKg / nonHolidayActiveDays : 0;
+
+    let insight = "No clear difference detected yet.";
+
+    if (holidayWeightKg > nonHolidayWeightKg) {
+      insight = "Collection weight is higher on holidays.";
+    } else if (holidayWeightKg < nonHolidayWeightKg) {
+      insight = "Collection weight is lower on holidays.";
+    }
+
+    return res.status(200).json({
+      year,
+      holidayWeightKg,
+      nonHolidayWeightKg,
+      holidayActions,
+      nonHolidayActions,
+      holidayActiveDays,
+      nonHolidayActiveDays,
+      holidayAvgWeightPerActiveDay,
+      nonHolidayAvgWeightPerActiveDay,
+      insight,
+    });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

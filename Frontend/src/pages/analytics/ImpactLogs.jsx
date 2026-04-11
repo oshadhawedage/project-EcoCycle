@@ -8,10 +8,15 @@ import {
   Leaf,
   FileText,
   Filter,
+  Search,
+  ArrowUpRight,
+  SlidersHorizontal,
+  CalendarRange,
 } from 'lucide-react';
 import { getImpactLogs } from '../../services/api';
 
 import recordBanner from '../../assets/RecordBanner.png';
+
 import { PageShell, SummaryCard } from '../../shared/PageShell';
 
 const ImpactLogs = () => {
@@ -19,6 +24,7 @@ const ImpactLogs = () => {
   const [loading, setLoading] = useState(true);
   const [actionFilter, setActionFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -45,11 +51,38 @@ const ImpactLogs = () => {
       maximumFractionDigits: 1,
     });
 
+  const filteredLogs = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    if (!keyword) return logs;
+
+    return logs.filter((item) => {
+      const createdAt = item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString().toLowerCase()
+        : '';
+
+      return (
+        item.userName?.toLowerCase().includes(keyword) ||
+        item.actionType?.toLowerCase().includes(keyword) ||
+        item.category?.toLowerCase().includes(keyword) ||
+        createdAt.includes(keyword)
+      );
+    });
+  }, [logs, searchTerm]);
+
   const stats = useMemo(() => {
-    const totalLogs = logs.length;
-    const totalWeight = logs.reduce((sum, item) => sum + (Number(item.weightKg) || 0), 0);
-    const totalCo2 = logs.reduce((sum, item) => sum + (Number(item.co2SavedKg) || 0), 0);
-    const recycleCount = logs.filter((item) => item.actionType === 'RECYCLE').length;
+    const totalLogs = filteredLogs.length;
+    const totalWeight = filteredLogs.reduce(
+      (sum, item) => sum + (Number(item.weightKg) || 0),
+      0
+    );
+    const totalCo2 = filteredLogs.reduce(
+      (sum, item) => sum + (Number(item.co2SavedKg) || 0),
+      0
+    );
+    const recycleCount = filteredLogs.filter(
+      (item) => item.actionType === 'RECYCLE'
+    ).length;
 
     return {
       totalLogs,
@@ -57,7 +90,7 @@ const ImpactLogs = () => {
       totalCo2,
       recycleCount,
     };
-  }, [logs]);
+  }, [filteredLogs]);
 
   const getBadgeStyle = (action) => {
     switch (action) {
@@ -89,33 +122,38 @@ const ImpactLogs = () => {
     <PageShell
       banner={recordBanner}
       bannerAlt="Impact records banner"
+   
       loading={loading}
     >
       <div className="text-center mb-10">
         <p className="text-[#0f55a7] font-semibold text-sm mb-2 uppercase tracking-widest">
           EcoCycle Admin Portal
         </p>
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-900">Impact Logs</h2>
-        <p className="mt-3 text-slate-600 max-w-3xl mx-auto">
-          Review platform-wide impact records with a clean operational view of material movement,
-          action types, and environmental savings.
+        <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+          Impact Logs
+        </h2>
+        <p className="mt-3 text-slate-600 max-w-3xl mx-auto leading-7">
+          Review all impact activity in one operational workspace, with a clearer view of
+          environmental savings, material flow, and action-level performance across the platform.
         </p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden mb-8">
         <div className="grid lg:grid-cols-[1.3fr_0.7fr]">
           <div className="p-8 md:p-10">
-            <div className="inline-flex items-center rounded-full bg-sky-50 text-sky-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em]">
-              Operations Overview
+            <div className="inline-flex items-center rounded-full bg-[#0f55a7]/5 text-[#0f55a7] px-3 py-1 text-xs font-bold uppercase tracking-[0.22em]">
+              Operational Ledger
             </div>
 
-            <h3 className="mt-5 text-3xl font-bold text-slate-950">
-              Track every impact entry with clarity
-            </h3>
+           <h3 className="mt-5 text-3xl font-bold">
+  <span className="text-[#1055a7]">Track every impact</span>{' '}
+  <span className="text-[#2a9322]">entry with precision</span>
+</h3>
 
             <p className="mt-4 text-slate-600 leading-8 max-w-2xl">
-              Filter impact activities, monitor environmental savings, and review material flows
-              across the system in one clean administrative space.
+              Filter impact records by action and category, inspect platform-wide material
+              movement, and monitor environmental value through a cleaner and more professional
+              administrative view.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -133,8 +171,8 @@ const ImpactLogs = () => {
                 </span>
               </div>
 
-              <div className="inline-flex items-center rounded-full border border-sky-100 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700">
-                {logs.length} result{logs.length !== 1 ? 's' : ''}
+              <div className="inline-flex items-center rounded-full border border-[#4db848]/20 bg-[#4db848]/10 px-4 py-2 text-sm font-semibold text-[#2c8a28]">
+                {filteredLogs.length} result{filteredLogs.length !== 1 ? 's' : ''}
               </div>
             </div>
           </div>
@@ -147,7 +185,7 @@ const ImpactLogs = () => {
             <div className="mt-5 space-y-4">
               <div className="rounded-xl border border-slate-200 bg-white px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500">Current Records</span>
+                  <span className="text-sm text-slate-500">Active Records</span>
                   <Database className="w-4 h-4 text-slate-300" />
                 </div>
                 <p className="mt-2 text-2xl font-bold text-slate-950">
@@ -157,10 +195,10 @@ const ImpactLogs = () => {
 
               <div className="rounded-xl border border-slate-200 bg-white px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500">Total Weight</span>
+                  <span className="text-sm text-slate-500">Processed Weight</span>
                   <Scale className="w-4 h-4 text-slate-300" />
                 </div>
-                <p className="mt-2 text-2xl font-bold text-slate-950">
+                <p className="mt-2 text-2xl font-bold text-[#0f55a7]">
                   {formatNum(stats.totalWeight)} kg
                 </p>
               </div>
@@ -184,19 +222,19 @@ const ImpactLogs = () => {
           title="Total Records"
           value={formatNum(stats.totalLogs)}
           subtitle="Matched entries in current result set"
-          tone="text-sky-700"
+          tone="text-[#0f55a7]"
         />
         <SummaryCard
           title="Total Weight"
           value={`${formatNum(stats.totalWeight)} kg`}
           subtitle="Processed material weight"
-          tone="text-emerald-600"
+          tone="text-[#4db848]"
         />
         <SummaryCard
           title="CO₂ Averted"
           value={`${formatNum(stats.totalCo2)} kg`}
           subtitle="Estimated environmental savings"
-          tone="text-teal-700"
+          tone="text-emerald-600"
         />
         <SummaryCard
           title="Recycle Actions"
@@ -214,18 +252,29 @@ const ImpactLogs = () => {
                 Records Explorer
               </p>
               <h3 className="mt-2 text-xl font-bold text-slate-950">
-                Operational Ledger
+                Platform Activity Register
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                Filter impact activities by action type and category.
+                Search and filter impact activities by action, category, and record details.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full xl:w-auto">
               <div className="relative">
-                <Filter className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
+                <Search className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search logs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full min-w-[210px] rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                />
+              </div>
+
+              <div className="relative">
+                <SlidersHorizontal className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
                 <select
-                  className="min-w-[190px] rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                  className="w-full min-w-[180px] rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
                   value={actionFilter}
                   onChange={(e) => setActionFilter(e.target.value)}
                 >
@@ -236,16 +285,22 @@ const ImpactLogs = () => {
                 </select>
               </div>
 
-              <select
-                className="min-w-[190px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-              >
-                <option value="">All Categories</option>
-                <option value="Laptop">Laptop</option>
-                <option value="Phone">Phone</option>
-                <option value="Battery">Battery</option>
-              </select>
+              <div className="relative">
+                <Filter className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
+                <select
+                  className="w-full min-w-[180px] rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  <option value="">All Categories</option>
+                  <option value="Laptop">Laptop</option>
+                  <option value="Phone">Phone</option>
+                  <option value="Battery">Battery</option>
+                  <option value="Cable">Cable</option>
+                  <option value="CRT">CRT</option>
+                  <option value="PCB">PCB</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -253,12 +308,12 @@ const ImpactLogs = () => {
         <div className="overflow-x-auto">
           <table className="w-full whitespace-nowrap">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70 text-left">
+              <tr className="border-b border-slate-100 bg-slate-50/80 text-left">
                 <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                  Timestamp
+                  Date
                 </th>
                 <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                  Public Citizen
+                  User
                 </th>
                 <th className="px-8 py-4 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
                   Action
@@ -276,7 +331,7 @@ const ImpactLogs = () => {
             </thead>
 
             <tbody className="divide-y divide-slate-100">
-              {logs.length === 0 ? (
+              {filteredLogs.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-8 py-20 text-center">
                     <div className="mx-auto max-w-md">
@@ -287,20 +342,23 @@ const ImpactLogs = () => {
                         No records found
                       </h4>
                       <p className="mt-2 text-sm leading-7 text-slate-500">
-                        There are no impact logs matching the current filter selection.
+                        There are no impact logs matching the current filters or search term.
                         Adjust the filters to broaden the result set.
                       </p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                logs.map((log) => (
+                filteredLogs.map((log) => (
                   <tr
                     key={log._id}
                     className="transition-colors hover:bg-slate-50/70"
                   >
                     <td className="px-8 py-5 text-sm text-slate-500">
-                      {new Date(log.createdAt).toLocaleDateString()}
+                      <div className="flex items-center gap-2">
+                        <CalendarRange className="w-4 h-4 text-slate-300" />
+                        <span>{new Date(log.createdAt).toLocaleDateString()}</span>
+                      </div>
                     </td>
 
                     <td className="px-8 py-5">
@@ -328,8 +386,11 @@ const ImpactLogs = () => {
                       {formatNum(log.weightKg)} kg
                     </td>
 
-                    <td className="px-8 py-5 text-right text-sm font-bold text-emerald-600">
-                      +{formatNum(log.co2SavedKg)} kg
+                    <td className="px-8 py-5 text-right">
+                      <span className="inline-flex items-center justify-end gap-1 text-sm font-bold text-emerald-600">
+                        +{formatNum(log.co2SavedKg)} kg
+                        <ArrowUpRight className="w-4 h-4" />
+                      </span>
                     </td>
                   </tr>
                 ))

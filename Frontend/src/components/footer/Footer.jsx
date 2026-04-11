@@ -26,7 +26,7 @@ const Footer = () => {
 
           {/* ================= NETWORK ================= */}
           <div className="flex flex-col items-end">
-            <h3 className="text-sm font-bold  uppercase tracking-widest mb-5 ">
+            <h3 className="text-sm font-bold  uppercase tracking-widest mb-5 text-[#0f3b7a]">
               Network
             </h3>
             <ul className="space-y-3.5 text-right">

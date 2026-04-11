@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Save, ShieldCheck, CheckCircle2, AlertTriangle } from 'lucide-react';
+import {
+  Save,
+  ShieldCheck,
+  CheckCircle2,
+  AlertTriangle,
+  SlidersHorizontal,
+  Target,
+  Leaf,
+} from 'lucide-react';
 import { getSettings, updateSettings } from '../../services/api';
 
+
+import { PageShell } from '../../shared/PageShell';
+
 const ImpactSettings = () => {
-  const [formData, setFormData] = useState({ co2FactorPerKg: '', monthlyTargetKg: '' });
+  const [formData, setFormData] = useState({
+    co2FactorPerKg: '',
+    monthlyTargetKg: '',
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-  const [pageVisible, setPageVisible] = useState(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -18,229 +31,278 @@ const ImpactSettings = () => {
           monthlyTargetKg: response.data.monthlyTargetKg,
         });
       } catch (error) {
-        console.error(error);
+        console.error('Failed to load settings:', error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchSettings();
   }, []);
 
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      setPageVisible(true);
-    });
-
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  const handleChange = (e) =>
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setMessage(null);
+
     try {
       await updateSettings({
         co2FactorPerKg: Number(formData.co2FactorPerKg),
         monthlyTargetKg: Number(formData.monthlyTargetKg),
       });
+
       setMessage({
         type: 'success',
-        text: 'Settings updated. Historical data recalculation initialized.',
+        text: 'Configuration updated successfully.',
       });
+
       setTimeout(() => setMessage(null), 4000);
     } catch (error) {
       console.error(error);
-      setMessage({ type: 'error', text: 'Failed to save configuration.' });
+      setMessage({
+        type: 'error',
+        text: 'Failed to save configuration.',
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <span
-          aria-label="Loading"
-          className="inline-block h-10 w-10 rounded-full from-sky-600 to-emerald-500 animate-spin"
-          style={{
-            backgroundImage:
-              'conic-gradient(from 90deg, var(--tw-gradient-from), var(--tw-gradient-to), transparent 70%)',
-            WebkitMask:
-              'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0)',
-            mask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0)',
-          }}
-        />
-      </div>
-    );
-  }
+  const inputFields = [
+    {
+      id: 'co2FactorPerKg',
+      label: 'CO₂ Equivalency Factor',
+      description: 'Defines how many kilograms of CO₂ are averted per 1 kg of processed e-waste.',
+      icon: Leaf,
+      unit: 'kg CO₂ / kg',
+      step: '0.1',
+      tone: 'text-[#0f55a7]',
+      cardValue: `${formData.co2FactorPerKg || '—'}`,
+      cardUnit: 'kg CO₂ / kg',
+    },
+    {
+      id: 'monthlyTargetKg',
+      label: 'Monthly Target',
+      description: 'Sets the monthly collection target used across dashboard progress tracking.',
+      icon: Target,
+      unit: 'kg',
+      step: '1',
+      tone: 'text-[#2a9322]',
+      cardValue: `${formData.monthlyTargetKg || '—'}`,
+      cardUnit: 'kg',
+    },
+  ];
 
   return (
-    <div
-      className={`max-w-[1280px] mx-auto px-4 py-12 font-sans bg-slate-50 min-h-screen transition-all duration-500 ease-out ${
-        pageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-      }`}
+    <PageShell
+      loading={loading}
+     
+     
     >
       <div className="text-center mb-10">
-        <p className="text-sky-700 font-semibold text-sm mb-2 uppercase tracking-widest">
+        <p className="text-[#0f55a7] font-semibold text-sm mb-2 uppercase tracking-widest">
           EcoCycle Admin Portal
         </p>
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-900">Configuration</h2>
-        <p className="mt-3 text-slate-600 max-w-2xl mx-auto">
-          Update the calculation factor and the national monthly target used across analytics and
-          progress tracking.
+        <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+          Configuration
+        </h2>
+        <p className="mt-3 text-slate-600 max-w-3xl mx-auto leading-7">
+          Manage the platform-wide calculation settings used in impact analytics,
+          environmental reporting, and monthly performance tracking.
         </p>
       </div>
 
       {message && (
-        <div className="max-w-3xl mx-auto mb-8">
+        <div className="max-w-5xl mx-auto mb-8">
           <div
-            className={`p-4 rounded-xl flex items-center shadow-inner ${
+            className={`rounded-xl border px-4 py-3 flex items-center gap-3 shadow-sm ${
               message.type === 'success'
-                ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200'
-                : 'bg-red-50 text-red-800 ring-1 ring-red-200'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-red-50 border-red-200 text-red-800'
             }`}
           >
             {message.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 mr-3 text-emerald-600" />
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
             ) : (
-              <AlertTriangle className="w-5 h-5 mr-3 text-red-600" />
+              <AlertTriangle className="w-5 h-5 shrink-0" />
             )}
-            <span className="font-semibold">{message.text}</span>
+            <span className="text-sm font-semibold">{message.text}</span>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200 flex flex-col md:flex-row relative z-10 min-h-[450px]">
-        <div className="p-8 md:p-12 md:w-1/3 flex flex-col justify-center bg-white">
-          <h3 className="text-2xl font-bold text-slate-900 mb-4">Global settings</h3>
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            These values affect the dashboard KPIs, goal progress, and CO₂ impact calculations.
-            Use stable numbers and update only when policy changes.
-          </p>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+        <div className="grid lg:grid-cols-[1fr_1.2fr]">
+          <div className="p-8 md:p-10 border-b lg:border-b-0 lg:border-r border-slate-100 bg-white">
+            <div className="inline-flex items-center rounded-full bg-[#0f55a7]/5 text-[#0f55a7] px-3 py-1 text-xs font-bold uppercase tracking-[0.22em]">
+              System Controls
+            </div>
 
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-8">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-slate-500 mt-0.5" />
-              <div>
-                <p className="text-sm text-slate-500 font-medium">Admin-only</p>
-                <p className="text-sm text-slate-700 font-semibold">
-                  Administrative Authorization Required
-                </p>
+           <h3 className="mt-5 text-3xl font-bold text-slate-950">
+  <span className="text-[#1055a7]">Configure analytics</span>{' '}
+  <span className="text-[#2a9322]">fundamentals</span>
+</h3>
+
+            <p className="mt-4 text-slate-600 leading-8 max-w-xl">
+              These values directly affect CO₂ calculations, dashboard summaries,
+              and monthly progress indicators. Use stable, approved numbers to
+              maintain reporting consistency across the platform.
+            </p>
+
+            <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="w-5 h-5 text-slate-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">
+                    Admin Authorization Required
+                  </p>
+                  <p className="text-sm text-slate-500 mt-1 leading-6">
+                    Changes made here affect system-wide analytics and historical
+                    recalculation behavior.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <p className="text-sm font-semibold text-slate-500 mb-1 uppercase tracking-wider">
-                CO₂ Factor
-              </p>
-              <p className="text-2xl font-black text-sky-700">
-                {formData.co2FactorPerKg || '—'}{' '}
-                <span className="text-sm text-slate-400">kg CO₂ / kg</span>
-              </p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <p className="text-sm font-semibold text-slate-500 mb-1 uppercase tracking-wider">
-                Monthly Target
-              </p>
-              <p className="text-2xl font-black text-emerald-600">
-                {formData.monthlyTargetKg || '—'}{' '}
-                <span className="text-sm text-slate-400">kg</span>
-              </p>
-            </div>
-          </div>
-        </div>
+            <div className="mt-8 grid gap-4">
+              {inputFields.map((field) => {
+                const Icon = field.icon;
 
-        <div className="md:w-2/3 p-8 bg-slate-50 border-l border-slate-100">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 md:p-8"
-          >
-            <div className="grid grid-cols-1 gap-6">
-              {[
-                {
-                  id: 'co2FactorPerKg',
-                  title: 'CO₂ Equivalency Factor',
-                  sub: 'How many kilograms of emissions are averted per 1kg e-waste?',
-                  unit: 'kg CO₂',
-                  step: '0.1',
-                },
-                {
-                  id: 'monthlyTargetKg',
-                  title: 'National Monthly Goal',
-                  sub: 'Sets the dashboard goal progress for the current month.',
-                  unit: 'kg',
-                  step: '1',
-                },
-              ].map((field) => (
-                <div key={field.id} className="grid md:grid-cols-5 gap-4 items-start">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-slate-900 mb-1">
-                      {field.title}
-                    </label>
-                    <p className="text-sm text-slate-500 leading-relaxed">{field.sub}</p>
-                  </div>
-
-                  <div className="md:col-span-3">
-                    <div className="relative w-full max-w-md">
-                      <input
-                        type="number"
-                        step={field.step}
-                        required
-                        name={field.id}
-                        value={formData[field.id]}
-                        onChange={handleChange}
-                        className="w-full pl-4 pr-20 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold text-slate-900"
-                      />
-                      <span className="absolute right-4 top-3.5 text-sm font-bold text-slate-400">
-                        {field.unit}
-                      </span>
+                return (
+                  <div
+                    key={field.id}
+                    className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                          {field.label}
+                        </p>
+                        <p className={`mt-2 text-3xl font-black ${field.tone}`}>
+                          {field.cardValue}
+                          <span className="ml-1 text-base font-semibold text-slate-400">
+                            {field.cardUnit}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-slate-400" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="p-8 md:p-10 bg-slate-50">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                <SlidersHorizontal className="w-5 h-5 text-[#0f55a7]" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                  Update Settings
+                </p>
+                <h3 className="text-xl font-bold text-slate-950">
+                  Administrative Parameters
+                </h3>
+              </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="text-sm text-slate-500">
-                Changes apply immediately to analytics calculations.
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8"
+            >
+              <div className="space-y-8">
+                {inputFields.map((field) => {
+                  const Icon = field.icon;
+
+                  return (
+                    <div key={field.id} className="grid md:grid-cols-[1fr_1.1fr] gap-5 items-start">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Icon className="w-4 h-4 text-slate-400" />
+                          <label
+                            htmlFor={field.id}
+                            className="text-sm font-bold text-slate-900"
+                          >
+                            {field.label}
+                          </label>
+                        </div>
+                        <p className="text-sm text-slate-500 leading-7">
+                          {field.description}
+                        </p>
+                      </div>
+
+                      <div>
+                        <div className="relative">
+                          <input
+                            id={field.id}
+                            type="number"
+                            step={field.step}
+                            required
+                            name={field.id}
+                            value={formData[field.id]}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 pr-28 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                          />
+                          <span className="absolute right-4 top-3.5 text-xs font-bold text-slate-400 whitespace-nowrap">
+                            {field.unit}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="bg-amber-300 hover:bg-amber-400 text-slate-900 font-bold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm w-max disabled:opacity-70"
-              >
-                {saving ? (
-                  <>
-                    <span
-                      aria-hidden="true"
-                      className="inline-block h-4 w-4 rounded-full from-sky-600 to-emerald-500 animate-spin"
-                      style={{
-                        backgroundImage:
-                          'conic-gradient(from 90deg, var(--tw-gradient-from), var(--tw-gradient-to), transparent 70%)',
-                        WebkitMask:
-                          'radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0)',
-                        mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0)',
-                      }}
-                    />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    Save Configuration <Save className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+              <div className="mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <p className="text-sm text-slate-500 leading-6">
+                  Saved changes apply immediately to analytics calculations.
+                </p>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                 className="bg-[#0f55a7] hover:bg-[#0c478d] text-white font-semibold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap"
+                >
+                  {saving ? (
+                    <>
+                      <span
+                        aria-hidden="true"
+                        className="inline-block h-4 w-4 rounded-full from-sky-600 to-emerald-500 animate-spin"
+                        style={{
+                          backgroundImage:
+                            'conic-gradient(from 90deg, var(--tw-gradient-from), var(--tw-gradient-to), transparent 70%)',
+                          WebkitMask:
+                            'radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0)',
+                          mask:
+                            'radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0)',
+                        }}
+                      />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      Save Configuration
+                      <Save className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 };
 
