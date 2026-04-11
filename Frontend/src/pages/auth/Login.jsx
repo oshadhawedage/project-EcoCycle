@@ -128,9 +128,7 @@ const Login = () => {
 
       // Redirect based on user role
       setTimeout(() => {
-        if (user.role === 'ADMIN') {
-          navigate('/admin/dashboard');
-        } else if (user.role === 'RECYCLER') {
+        if (user.role === 'RECYCLER') {
           navigate('/recycler/dashboard');
         } else {
           navigate('/user/dashboard');

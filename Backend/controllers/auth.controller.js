@@ -205,6 +205,9 @@ export const login = async (req, res, next) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    if (user.role === "ADMIN") {
+      return res.status(403).json({ message: "Admin accounts must login through /admin/login" });
+    }
     if (user.deletedAt) return res.status(401).json({ message: "Account deleted" });
     if (user.isBlocked) return res.status(403).json({ message: "Account blocked" });
 
