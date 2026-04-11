@@ -5,10 +5,12 @@ import {
   User, Mail, Phone, MapPin, Briefcase, Star, TrendingUp, Clock, Edit2, Save, X, 
   AlertCircle, CheckCircle, Loader, Key, Trash2, Award, FileText
 } from 'lucide-react';
-import API, { setAuthToken } from '../../services/api';
+import API from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const RecyclerProfile = () => {
   const navigate = useNavigate();
+  const { logout, updateUser } = useAuth();
   const [recyclerData, setRecyclerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -85,6 +87,7 @@ const RecyclerProfile = () => {
 
       const response = await API.patch('/users/me', updateData);
       setRecyclerData(response.data.user);
+      updateUser(response.data.user);
       setMessage('✅ Profile updated successfully');
       setIsEditing(false);
       setEditSection(null);
@@ -134,10 +137,7 @@ const RecyclerProfile = () => {
     try {
       await API.delete('/users/me');
       
-      setAuthToken(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('registeredEmail');
+      logout();
       
       setMessage('✅ Account deleted successfully');
       setTimeout(() => navigate('/login'), 2000);

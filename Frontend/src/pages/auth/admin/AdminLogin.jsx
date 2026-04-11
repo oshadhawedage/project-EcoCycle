@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, CheckCircle, Loader, Shield } from 'lucide-react';
-import API, { setAuthToken } from '../../../services/api';
+import API from '../../../services/api';
+import { useAuth } from '../../../context/AuthContext';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -73,10 +75,8 @@ const AdminLogin = () => {
 
       const { token, user, message } = response.data;
 
-      // Store token and user data
-      setAuthToken(token);
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('userRole', user.role);
+      // Use context to store token and user data
+      login(user, token);
 
       setSuccessMessage('Login successful! Redirecting to admin dashboard...');
 

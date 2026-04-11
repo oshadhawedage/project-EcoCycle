@@ -2,15 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, Menu, X, Briefcase, CheckCircle, XCircle, Settings, Home, LogOut } from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
-import API, { setAuthToken } from '../../services/api';
+import API from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const UserHeader = () => {
   const navigate = useNavigate();
+  const { logout, user, updateUser } = useAuth();
   const profileMenuRef = useRef(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [showRecyclerModal, setShowRecyclerModal] = useState(false);
-  const [userData, setUserData] = useState(null);
   const [recyclerRequest, setRecyclerRequest] = useState(null);
   const [notification, setNotification] = useState(null);
   const [isApproved, setIsApproved] = useState(false);
@@ -30,9 +31,7 @@ const UserHeader = () => {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      setAuthToken(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('userRole');
+      logout();
       navigate('/');
     }
   };
@@ -56,7 +55,8 @@ const UserHeader = () => {
         const userRes = await API.get('/users/me');
         const currentRole = userRes.data.user.role;
         
-        setUserData(userRes.data.user);
+        // Update context with fresh user data
+        updateUser(userRes.data.user);
 
         // ✅ Detect role change from USER to RECYCLER (Approval happened!)
         if (prevUserRole === 'USER' && currentRole === 'RECYCLER') {
@@ -167,7 +167,7 @@ const UserHeader = () => {
 
           <div className="flex-1 flex justify-end items-center gap-4">
             {/* Become Recycler Button - Only show if USER role */}
-            {userData?.role === 'USER' && !isApproved && (
+            {user?.role === 'USER' && !isApproved && (
               <button
                 onClick={() => setShowRecyclerModal(true)}
                 className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-[300] text-[14px] tracking-wide transition-all duration-200 ${
@@ -191,7 +191,7 @@ const UserHeader = () => {
             )}
 
             {/* ✅ Approved Button - Show briefly before redirect */}
-            {isApproved && userData?.role === 'RECYCLER' && (
+            {isApproved && user?.role === 'RECYCLER' && (
               <button
                 disabled
                 className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-[300] text-[14px] tracking-wide bg-green-500/20 text-green-100 animate-pulse"
@@ -210,7 +210,7 @@ const UserHeader = () => {
                   className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center text-white font-semibold text-sm"
                   title="Profile Menu"
                 >
-                  {userData?.fullName?.charAt(0) || 'U'}
+                  {user?.fullName?.charAt(0) || 'U'}
                 </button>
 
                 {/* Profile Dropdown Menu */}
@@ -218,8 +218,8 @@ const UserHeader = () => {
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-2xl z-50 overflow-hidden">
                     {/* User Info Section */}
                     <div className="px-4 py-4 bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white">
-                      <p className="font-semibold text-sm">{userData?.fullName || 'User'}</p>
-                      <p className="text-xs text-white/80">{userData?.email || 'user@email.com'}</p>
+                      <p className="font-semibold text-sm">{user?.fullName || 'User'}</p>
+                      <p className="text-xs text-white/80">{user?.email || 'user@email.com'}</p>
                     </div>
 
                     {/* Divider */}

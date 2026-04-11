@@ -10,10 +10,12 @@ import {
   Home,
 } from 'lucide-react';
 import myLogo from '../../assets/logo03.png';
-import API, { setAuthToken } from '../../services/api';
+import API from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
+  const { logout, user, updateUser } = useAuth();
   const location = useLocation();
   const profileMenuRef = useRef(null);
 
@@ -21,7 +23,6 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [pendingRecyclerCount, setPendingRecyclerCount] = useState(0);
-  const [adminData, setAdminData] = useState(null);
 
   const isActive = (path) => location.pathname === path;
 
@@ -50,14 +51,14 @@ const Header = () => {
     const fetchAdminData = async () => {
       try {
         const response = await API.get('/admin/me');
-        setAdminData(response.data.admin);
+        updateUser(response.data.admin);
       } catch (err) {
         console.error('Error fetching admin data:', err);
       }
     };
 
     fetchAdminData();
-  }, []);
+  }, [updateUser]);
 
   useEffect(() => {
     const fetchPendingCount = async () => {
@@ -85,10 +86,7 @@ const Header = () => {
       // ignore signout request failure
     } finally {
       setIsProfileMenuOpen(false);
-      setAuthToken(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('registeredEmail');
+      logout();
       navigate('/');
     }
   };
@@ -168,15 +166,15 @@ const Header = () => {
                   className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center text-white font-semibold text-sm"
                   title="Profile Menu"
                 >
-                  {adminData?.fullName?.charAt(0) || 'A'}
+                  {user?.fullName?.charAt(0) || 'A'}
                 </button>
 
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-2xl z-50 overflow-hidden">
                     <div className="px-4 py-4 bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white">
-                      <p className="font-semibold text-sm">{adminData?.fullName || 'Admin'}</p>
+                      <p className="font-semibold text-sm">{user?.fullName || 'Admin'}</p>
                       <p className="text-xs text-white/80">
-                        {adminData?.email || 'admin@email.com'}
+                        {user?.email || 'admin@email.com'}
                       </p>
                     </div>
 

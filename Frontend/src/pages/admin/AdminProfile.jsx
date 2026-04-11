@@ -4,10 +4,12 @@ import {
   User, Mail, Phone, MapPin, Shield, Clock, Edit2, Save, X, 
   AlertCircle, CheckCircle, Loader, Key, Trash2
 } from 'lucide-react';
-import API, { setAuthToken } from '../../services/api';
+import API from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminProfile = () => {
   const navigate = useNavigate();
+  const { logout, updateUser } = useAuth();
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -70,7 +72,9 @@ const AdminProfile = () => {
       };
 
       const response = await API.patch('/admin/update-profile', updateData);
-      setAdminData(response.data.user || response.data.admin);
+      const updatedAdmin = response.data.user || response.data.admin;
+      setAdminData(updatedAdmin);
+      updateUser(updatedAdmin);
       setMessage('✅ Profile updated successfully');
       setIsEditing(false);
       setEditSection(null);
@@ -120,10 +124,7 @@ const AdminProfile = () => {
     try {
       await API.delete('/admin/profile');
       
-      setAuthToken(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('registeredEmail');
+      logout();
       
       setMessage('✅ Account deleted successfully');
       setTimeout(() => navigate('/admin/login'), 2000);
