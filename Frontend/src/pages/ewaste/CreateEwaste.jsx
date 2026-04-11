@@ -4,6 +4,8 @@ import { createEwasteItem } from "../../services/api";
 
 const CreateEwaste = () => {
   const navigate = useNavigate();
+  const [useProfileAddress, setUseProfileAddress] = useState(true);
+  const [pickupAddress, setPickupAddress] = useState("");
 
   const [formData, setFormData] = useState({
     deviceType: "",
@@ -26,6 +28,10 @@ const CreateEwaste = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!useProfileAddress && !pickupAddress.trim()) {
+    return alert("Please enter pickup address");
+    }
+
     try {
       setLoading(true);
 
@@ -34,6 +40,7 @@ const CreateEwaste = () => {
         ...formData,
         age: Number(formData.age),
         weight: Number(formData.weight),
+        pickupAddress: useProfileAddress ? null : pickupAddress,
       };
 
       await createEwasteItem(payload);
@@ -167,6 +174,43 @@ const CreateEwaste = () => {
               <option value="Sell">Sell</option>
             </select>
           </div>
+
+          {/* Pickup Address */}
+          <div>
+            <label className="block text-sm font-medium mb-3">Pickup Address</label>
+
+          {/* Radio Options */}
+          <div className="space-y-2 mb-3">
+          <label className="flex items-center gap-2 text-sm">
+          <input
+             type="radio"
+             checked={useProfileAddress}
+             onChange={() => setUseProfileAddress(true)}
+          />
+            Use my profile address
+         </label>
+
+         <label className="flex items-center gap-2 text-sm">
+         <input
+            type="radio"
+            checked={!useProfileAddress}
+            onChange={() => setUseProfileAddress(false)}
+          />
+             Enter different address
+          </label>
+      </div>
+
+        {/* Conditional Input */}
+      {!useProfileAddress && (
+      <textarea
+          value={pickupAddress}
+          onChange={(e) => setPickupAddress(e.target.value)}
+          placeholder="Enter pickup address"
+          className="w-full border rounded-xl px-4 py-3"
+          required
+         />
+        )}
+        </div>
 
           {/* BUTTON */}
           <button
