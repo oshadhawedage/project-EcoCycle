@@ -12,9 +12,11 @@ import {
 } from "../../services/api";
 import RecyclerPickupsPage from "../pickups/RecyclerPickupsPage";
 import headerImage from "../../assets/RecyclerHeader.png";
-
+import { useNavigate } from "react-router-dom";
 
 const RecyclerDashboard = () => {
+  const navigate = useNavigate(); // ✅ added
+
   // Store all pickup requests
   const [allRequests, setAllRequests] = useState([]);
 
@@ -80,7 +82,11 @@ const RecyclerDashboard = () => {
       <section className="max-w-[1400px] mx-auto py-10 space-y-8">
         {/* ================= SUMMARY CARDS ================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          
+          <div
+            onClick={() => navigate("/pickups")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Total Requests</p>
@@ -92,7 +98,10 @@ const RecyclerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div
+            onClick={() => navigate("/pickups/accepted")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Accepted Requests</p>
@@ -104,7 +113,10 @@ const RecyclerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div
+            onClick={() => navigate("/pickups/collected")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Collected</p>
@@ -116,7 +128,10 @@ const RecyclerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div
+            onClick={() => navigate("/pickups/completed")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Completed</p>
@@ -167,8 +182,6 @@ const RecyclerDashboard = () => {
             </p>
           </div>
         </div>
-
-        
       </section>
     </main>
   );
