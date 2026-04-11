@@ -31,6 +31,14 @@ const EwasteItemSchema = new mongoose.Schema(
       required: [true, "Disposal type is required"],
       enum: ["Recycle", "Donate", "Sell"],
     },
+    pickupAddress: {
+      type: String,
+      default: null,
+    },
+    useProfileAddress: {
+      type: Boolean,
+      default: true,
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

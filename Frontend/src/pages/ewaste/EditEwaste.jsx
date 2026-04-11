@@ -6,6 +6,9 @@ const EditEwaste = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const [useProfileAddress, setUseProfileAddress] = useState(true);
+  const [pickupAddress, setPickupAddress] = useState("");
+
   const [formData, setFormData] = useState({
     deviceType: "",
     brand: "",
@@ -14,6 +17,8 @@ const EditEwaste = () => {
     weight: "",
     disposalType: "",
   });
+
+  
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -33,6 +38,9 @@ const EditEwaste = () => {
         weight: item.weight,
         disposalType: item.disposalType,
       });
+
+      setUseProfileAddress(item.useProfileAddress ?? true);
+      setPickupAddress(item.pickupAddress || "")
 
     } catch (error) {
       alert("Failed to load item");
@@ -58,9 +66,17 @@ const EditEwaste = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!useProfileAddress && !pickupAddress.trim()) {
+      return  alert("Please enter pickup address");
+    }
+
     try {
       setLoading(true);
-      await updateEwasteItem(id, formData);
+      await updateEwasteItem(id, {
+        ...formData,
+        useProfileAddress,
+        pickupAddress: useProfileAddress ? null : pickupAddress,
+     });
 
       alert("Item updated successfully!");
       navigate("/user/dashboard");
@@ -176,6 +192,41 @@ const EditEwaste = () => {
             <option value="Donate">Donate</option>
             <option value="Sell">Sell</option>
           </select>
+
+
+          {/* Address Option */}
+        <div>
+         <label className="block text-sm font-medium mb-2">
+            Pickup Address Option
+         </label>
+
+         <select
+            value={useProfileAddress ? "profile" : "custom"}
+            onChange={(e) =>
+            setUseProfileAddress(e.target.value === "profile")
+          }
+          className="w-full border rounded-xl px-4 py-3"
+         >
+          <option value="profile">Use My Profile Address</option>
+          <option value="custom">Enter Different Address</option>
+        </select>
+       </div>
+
+        {/* Custom Address */}
+        {!useProfileAddress && (
+       <div>
+       <label className="block text-sm font-medium mb-2">
+         Pickup Address
+       </label>
+       <textarea
+         value={pickupAddress}
+         onChange={(e) => setPickupAddress(e.target.value)}
+         required={!useProfileAddress}
+         className="w-full border rounded-xl px-4 py-3"
+         rows={3}
+        />
+        </div>
+        )}
 
           {/* BUTTON */}
           <button

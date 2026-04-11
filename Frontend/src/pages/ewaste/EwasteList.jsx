@@ -7,7 +7,7 @@ const EwasteList = () => {
   const navigate = useNavigate();
   const userRole = localStorage.getItem("userRole"); 
 
-  console.log("Role:", userRole); // DEBUG
+  //console.log("Role:", userRole); // DEBUG
 
   const fetchItems = async () => {
     try {
@@ -82,19 +82,42 @@ const EwasteList = () => {
     <section className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
 
       {/* ADD BUTTON */}
+      {items.length > 0 && (
       <div className="flex justify-end mb-6">
-        <button
-          onClick={() => navigate("/user/ewaste/create")}
-          className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90"
-        >
-          + Add New Item
-        </button>
+      <button
+        onClick={() => navigate("/user/ewaste/create")}
+        className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90"
+      >
+        + Add New Item
+      </button>
       </div>
+   )}
 
       {items.length === 0 ? (
-        <div className="bg-white p-6 rounded-xl border text-center">
-          No items found
-        </div>
+        <div className="bg-white p-10 rounded-2xl border text-center shadow-sm flex flex-col items-center">
+    
+     {/* Icon */}
+     <div className="text-5xl mb-4">♻️</div>
+
+     {/* Title */}
+     <h2 className="text-xl font-semibold text-slate-700 mb-2">
+      No E-Waste Items Yet
+     </h2>
+
+     {/* Description */}
+     <p className="text-slate-500 text-sm mb-6 max-w-md">
+      Start by adding your first electronic waste item and help make the planet greener.
+     </p>
+
+     {/* CTA Button */}
+     <button
+      onClick={() => navigate("/user/ewaste/create")}
+      className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90"
+     >
+      + Add Your First Item
+     </button>
+
+     </div>
       ) : (
         <div className="grid md:grid-cols-3 gap-6">
           {items.map((item) => (
@@ -107,9 +130,16 @@ const EwasteList = () => {
                   {item.deviceType} - {item.brand}
                 </h3>
 
-                <p className="text-sm text-slate-500 mt-2">
-                  Condition: {item.condition}
-                </p>
+                {/* Info Grid */}
+              <div className="mt-3 space-y-1 text-sm text-slate-500">
+               <p>Condition: <span className="text-slate-700">{item.condition}</span></p>
+               <p>Age: <span className="text-slate-700">{item.age} yrs</span></p>
+               <p>Weight: <span className="text-slate-700">{item.weight} kg</span></p>
+               <p>
+               Disposal:{" "}
+             <span className="text-slate-700">{item.disposalType}</span>
+             </p>
+             </div>
 
                 <span
                   className={`inline-block mt-3 px-3 py-1 text-xs rounded-full ${getStatusColor(item.status)}`}
