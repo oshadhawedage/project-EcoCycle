@@ -4,10 +4,12 @@ import {
   User, Mail, Phone, MapPin, Clock, Edit2, Save, X, 
   AlertCircle, CheckCircle, Loader, Key, Trash2, Leaf, Zap
 } from 'lucide-react';
-import API, { setAuthToken } from '../../services/api';
+import API from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const UserProfile = () => {
   const navigate = useNavigate();
+  const { logout, updateUser } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -71,6 +73,7 @@ const UserProfile = () => {
 
       const response = await API.patch('/users/me', updateData);
       setUserData(response.data.user);
+      updateUser(response.data.user);
       setMessage('✅ Profile updated successfully');
       setIsEditing(false);
       setEditSection(null);
@@ -120,10 +123,7 @@ const UserProfile = () => {
     try {
       await API.delete('/users/me');
       
-      setAuthToken(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('registeredEmail');
+      logout();
       
       setMessage('✅ Account deleted successfully');
       setTimeout(() => navigate('/login'), 2000);
