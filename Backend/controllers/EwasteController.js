@@ -6,7 +6,7 @@ export const createEwasteItem = async (req, res) => {
   
   try {
 
-    const { deviceType, brand, condition, age, weight, disposalType } = req.body;
+    const { deviceType, brand, condition, age, weight, disposalType, pickupAddress } = req.body;
 
     // 🛑 Basic validation
     if (!deviceType || !brand || !condition || age == null || !weight || !disposalType) {
@@ -22,6 +22,7 @@ export const createEwasteItem = async (req, res) => {
       age,
       weight,
       disposalType,
+      pickupAddress: pickupAddress || null,
       owner: req.user._id,
       status: "available", // enforce default status
     });

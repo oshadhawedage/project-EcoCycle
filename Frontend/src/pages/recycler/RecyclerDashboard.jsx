@@ -11,8 +11,12 @@ import {
   getAcceptedPickupRequests,
 } from "../../services/api";
 import RecyclerPickupsPage from "../pickups/RecyclerPickupsPage";
+import headerImage from "../../assets/RecyclerHeader.png";
+import { useNavigate } from "react-router-dom";
 
 const RecyclerDashboard = () => {
+  const navigate = useNavigate(); // ✅ added
+
   // Store all pickup requests
   const [allRequests, setAllRequests] = useState([]);
 
@@ -67,27 +71,22 @@ const RecyclerDashboard = () => {
   return (
     <main className="flex-1 bg-[#f5f7fb]">
       {/* ================= HERO SECTION ================= */}
-      <section className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white rounded-3xl">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
-          <p className="uppercase tracking-[0.25em] text-xs text-white/80 mb-3">
-            Recycler Dashboard
-          </p>
-
-          <h1 className="text-3xl md:text-5xl font-semibold mb-3">
-            Pickup Management Center
-          </h1>
-
-          <p className="text-white/90 max-w-2xl text-sm md:text-base">
-            Manage customer pickup requests, monitor accepted collections, and
-            update the recycling workflow efficiently.
-          </p>
-        </div>
+      <section className="rounded-3xl overflow-hidden">
+        <img
+          src={headerImage}
+          alt="Recycler Header"
+          className="w-full h-[220px] object-cover"
+        />
       </section>
 
       <section className="max-w-[1400px] mx-auto py-10 space-y-8">
         {/* ================= SUMMARY CARDS ================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          
+          <div
+            onClick={() => navigate("/pickups")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Total Requests</p>
@@ -99,7 +98,10 @@ const RecyclerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div
+            onClick={() => navigate("/pickups/accepted")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Accepted Requests</p>
@@ -111,7 +113,10 @@ const RecyclerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div
+            onClick={() => navigate("/pickups/collected")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Collected</p>
@@ -123,7 +128,10 @@ const RecyclerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div
+            onClick={() => navigate("/pickups/completed")}
+            className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm cursor-pointer hover:shadow-md hover:border-[#4db848] hover:-translate-y-1 transition-all duration-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Completed</p>
@@ -174,8 +182,6 @@ const RecyclerDashboard = () => {
             </p>
           </div>
         </div>
-
-        
       </section>
     </main>
   );
