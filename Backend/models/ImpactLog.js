@@ -5,6 +5,9 @@ const impactLogSchema = new mongoose.Schema(
     userId: { type: String, required: true },
     userName: { type: String, required: true },
 
+    // 🔥 ADD THIS
+    recyclerId: { type: String, required: true },
+
     actionType: {
       type: String,
       enum: ["RECYCLE", "DONATE", "SELL"],

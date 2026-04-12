@@ -11,7 +11,6 @@ import {
 } from "../../services/api";
 
 const RecyclerPickupsPage = ({ mode = "pending" }) => {
-
   const [showModal, setShowModal] = useState(false);
   const [requests, setRequests] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -22,34 +21,38 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
   const [accepting, setAccepting] = useState(false);
   const [updating, setUpdating] = useState(false);
 
-  
+  // Validate allowed modes to avoid unexpected filtering states
+  const validModes = ["pending", "accepted", "collected", "completed"];
+  const safeMode = validModes.includes(mode) ? mode : "pending";
 
   const fetchRequests = async () => {
     try {
       setLoadingList(true);
 
       const response = await getAllPickupRequests();
-      const allData = response.data || [];
+
+      // Validation: ensure response data is an array
+      const allData = Array.isArray(response?.data) ? response.data : [];
 
       let filteredByMode = [];
 
-      if (mode === "pending") {
-        filteredByMode = allData.filter((item) => item.status === "Pending");
-      } else if (mode === "accepted") {
-        filteredByMode = allData.filter((item) => item.status === "Accepted");
-      } else if (mode === "collected") {
-        filteredByMode = allData.filter((item) => item.status === "Collected");
-      } else if (mode === "completed") {
-        filteredByMode = allData.filter((item) => item.status === "Completed");
+      if (safeMode === "pending") {
+        filteredByMode = allData.filter((item) => item?.status === "Pending");
+      } else if (safeMode === "accepted") {
+        filteredByMode = allData.filter((item) => item?.status === "Accepted");
+      } else if (safeMode === "collected") {
+        filteredByMode = allData.filter((item) => item?.status === "Collected");
+      } else if (safeMode === "completed") {
+        filteredByMode = allData.filter((item) => item?.status === "Completed");
       }
 
       setRequests(filteredByMode);
 
       if (filteredByMode.length > 0) {
         const keepSelected = filteredByMode.find(
-          (item) => item._id === selectedId
+          (item) => item?._id === selectedId
         );
-        const nextId = keepSelected ? selectedId : filteredByMode[0]._id;
+        const nextId = keepSelected ? selectedId : filteredByMode[0]?._id || null;
         setSelectedId(nextId);
       } else {
         setSelectedId(null);
@@ -57,20 +60,33 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
       }
     } catch (error) {
       console.error("Failed to fetch pickup requests:", error);
+      setRequests([]);
+      setSelectedId(null);
+      setSelectedRequest(null);
     } finally {
       setLoadingList(false);
     }
   };
 
   const fetchRequestDetails = async (id) => {
-    if (!id) return;
+    // Validation: do not call API with invalid id
+    if (!id || typeof id !== "string") return;
 
     try {
       setLoadingDetails(true);
       const response = await getPickupRequestById(id);
-      setSelectedRequest(response.data);
+
+      // Validation: ensure object response
+      const data = response?.data;
+      if (!data || typeof data !== "object") {
+        setSelectedRequest(null);
+        return;
+      }
+
+      setSelectedRequest(data);
     } catch (error) {
       console.error("Failed to fetch pickup request details:", error);
+      setSelectedRequest(null);
     } finally {
       setLoadingDetails(false);
     }
@@ -78,7 +94,7 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
 
   useEffect(() => {
     fetchRequests();
-  }, [mode]);
+  }, [safeMode]);
 
   useEffect(() => {
     if (selectedId) {
@@ -87,24 +103,40 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
   }, [selectedId]);
 
   const filteredRequests = useMemo(() => {
+    // Validation: safe normalize search input
+    const keyword = String(searchTerm || "").trim().toLowerCase();
+
+    // If search is empty, return original list
+    if (!keyword) return requests;
+
     return requests.filter((item) => {
-      const keyword = searchTerm.toLowerCase();
+      const itemName = String(item?.itemName || "").toLowerCase();
+      const address = String(item?.address || "").toLowerCase();
+      const email = String(item?.email || "").toLowerCase();
+      const status = String(item?.status || "").toLowerCase();
 
       return (
-        item.itemName?.toLowerCase().includes(keyword) ||
-        item.address?.toLowerCase().includes(keyword) ||
-        item.email?.toLowerCase().includes(keyword) ||
-        item.status?.toLowerCase().includes(keyword)
+        itemName.includes(keyword) ||
+        address.includes(keyword) ||
+        email.includes(keyword) ||
+        status.includes(keyword)
       );
     });
   }, [requests, searchTerm]);
-  
+
   const handleAccept = async (id) => {
+    // Validation: prevent duplicate actions and invalid ids
+    if (accepting || updating) return;
+    if (!id || typeof id !== "string") {
+      alert("Invalid request id");
+      return;
+    }
+
     try {
       setAccepting(true);
       await acceptPickupRequest(id);
 
-      setRequests((prev) => prev.filter((item) => item._id !== id));
+      setRequests((prev) => prev.filter((item) => item?._id !== id));
       setSelectedId(null);
       setSelectedRequest(null);
       setShowModal(false);
@@ -116,11 +148,25 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
   };
 
   const handleUpdateStatus = async (id, status) => {
+    // Validation: prevent duplicate actions
+    if (accepting || updating) return;
+
+    // Validation: request id + allowed statuses only
+    const allowedStatuses = ["Collected", "Completed"];
+    if (!id || typeof id !== "string") {
+      alert("Invalid request id");
+      return;
+    }
+    if (!allowedStatuses.includes(status)) {
+      alert("Invalid status update");
+      return;
+    }
+
     try {
       setUpdating(true);
       await updatePickupRequestStatus(id, status);
 
-      setRequests((prev) => prev.filter((item) => item._id !== id));
+      setRequests((prev) => prev.filter((item) => item?._id !== id));
       setSelectedId(null);
       setSelectedRequest(null);
       setShowModal(false);
@@ -132,20 +178,20 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
   };
 
   const pageTitle =
-    mode === "pending"
+    safeMode === "pending"
       ? "Pending Pickup Requests"
-      : mode === "accepted"
+      : safeMode === "accepted"
       ? "Accepted Pickup Requests"
-      : mode === "collected"
+      : safeMode === "collected"
       ? "Collected Pickup Requests"
       : "Completed Pickup Requests";
 
   const pageDescription =
-    mode === "pending"
+    safeMode === "pending"
       ? "View pending customer pickup requests ready to be accepted."
-      : mode === "accepted"
+      : safeMode === "accepted"
       ? "View accepted pickup requests and mark them as collected."
-      : mode === "collected"
+      : safeMode === "collected"
       ? "View collected pickup requests and mark them as completed."
       : "View completed pickup requests.";
 
@@ -179,7 +225,11 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
               type="text"
               placeholder="Search requests..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                // Validation: safely store input as string and limit excessive length
+                const value = String(e.target.value || "").slice(0, 100);
+                setSearchTerm(value);
+              }}
               className="w-full rounded-xl border border-slate-300 pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#0f55a7]"
             />
           </div>
@@ -198,26 +248,30 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
             ) : (
               filteredRequests.map((request) => (
                 <PickupRequestCard
-                  key={request._id}
+                  key={request?._id}
                   request={request}
-                  selected={selectedId === request._id}
+                  selected={selectedId === request?._id}
                   onClick={() => {
-                     setSelectedId(request._id);
-                     setShowModal(true);
+                    // Validation: ignore invalid card data
+                    if (!request?._id) return;
+                    setSelectedId(request._id);
+                    setShowModal(true);
                   }}
                 />
               ))
             )}
           </div>
-
-          
         </div>
       </section>
 
-            {showModal && (
+      {showModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-          onClick={() => setShowModal(false)}
+          onClick={() => {
+            // Validation: do not allow accidental close during active action
+            if (accepting || updating) return;
+            setShowModal(false);
+          }}
         >
           <div
             className="w-full max-w-4xl"
@@ -230,7 +284,11 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
             ) : (
               <div className="relative">
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    // Validation: do not close modal while action is processing
+                    if (accepting || updating) return;
+                    setShowModal(false);
+                  }}
                   className="absolute -top-3 -right-3 z-10 bg-white text-slate-700 border border-slate-200 rounded-full w-10 h-10 shadow hover:bg-slate-50"
                 >
                   ×
@@ -242,7 +300,7 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
                   onUpdateStatus={handleUpdateStatus}
                   accepting={accepting}
                   updating={updating}
-                  mode={mode}
+                  mode={safeMode}
                 />
               </div>
             )}
