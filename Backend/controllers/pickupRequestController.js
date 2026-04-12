@@ -184,8 +184,11 @@ export const updateStatus = async (req, res) => {
       const co2SavedKg = weightKg * factor;
 
       await ImpactLog.create({
-        userId: request.userId,
-        userName: request.email,
+        userId: request.userId, // customer
+        userName: request.userName,
+
+        recyclerId: req.user._id.toString(), // 🔥 IMPORTANT
+
         actionType: "RECYCLE",
         category: "EWASTE",
         weightKg,

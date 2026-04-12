@@ -61,7 +61,11 @@ export const getOverview = async (req, res) => {
     const settings = await getOrCreateSettings();
 
     const isAdmin = req.user.role === "ADMIN";
-    const baseMatchStage = isAdmin ? {} : { userId: req.user._id.toString() };
+    const baseMatchStage = isAdmin
+      ? {}
+      : req.user.role === "RECYCLER"
+      ? { recyclerId: req.user._id.toString() }
+      : { userId: req.user._id.toString() };
 
     const period = req.query.period || "all_time";
 
