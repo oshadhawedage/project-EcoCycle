@@ -14,6 +14,7 @@ const CreateEwaste = () => {
     age: "",
     weight: "",
     disposalType: "",
+    quantity: 1,
   });
 
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ const CreateEwaste = () => {
         ...formData,
         age: Number(formData.age),
         weight: Number(formData.weight),
+        quantity: Number(formData.quantity),
         pickupAddress: useProfileAddress ? null : pickupAddress,
       };
 
@@ -48,7 +50,7 @@ const CreateEwaste = () => {
       // 🔥 AUTO create pickup request
       await createPickupRequest({
         ewasteItemId: res.data._id,
-        quantity: 1,
+        quantity: Number(formData.quantity),
       });
 
       alert("E-Waste item created successfully!");
@@ -163,6 +165,22 @@ const CreateEwaste = () => {
               className="w-full border rounded-xl px-4 py-3"
             />
           </div>
+          {/* Quantity */}
+          <div>
+         <label className="block text-sm font-medium mb-2">
+          Quantity
+        </label>
+
+         <input
+          type="number"
+          name="quantity"
+          value={formData.quantity}
+          onChange={handleChange}
+          min="1"
+          required
+          className="w-full border rounded-xl px-4 py-3"
+         />
+        </div>
 
           {/* Disposal Type */}
           <div>

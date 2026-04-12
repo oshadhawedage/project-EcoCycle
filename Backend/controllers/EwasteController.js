@@ -1,4 +1,5 @@
 import EwasteItem from "../models/EwasteItem.js";
+import PickupRequest from "../models/pickupRequestModel.js";
 
 // Create new e-waste item
 export const createEwasteItem = async (req, res) => {
@@ -6,10 +7,10 @@ export const createEwasteItem = async (req, res) => {
   
   try {
 
-    const { deviceType, brand, condition, age, weight, disposalType, pickupAddress } = req.body;
+    const { deviceType, brand, condition, age, weight, quantity, disposalType, pickupAddress } = req.body;
 
     // 🛑 Basic validation
-    if (!deviceType || !brand || !condition || age == null || !weight || !disposalType) {
+    if (!deviceType || !brand || !condition || age == null || !weight || !quantity ||!disposalType) {
       return res.status(400).json({
         message: "All fields are required",
       });
@@ -21,6 +22,7 @@ export const createEwasteItem = async (req, res) => {
       condition,
       age,
       weight,
+      quantity,
       disposalType,
       pickupAddress: pickupAddress || null,
       owner: req.user._id,
@@ -137,6 +139,10 @@ export const updateEwasteItem = async (req, res) => {
     if (req.user.role === "ADMIN") {
       Object.assign(item, req.body);
       const updatedItem = await item.save();
+      
+      // Sync pickup requests if key fields changed
+      await syncPickupRequest(updatedItem);
+
       return res.status(200).json(updatedItem);
     }
 
@@ -154,6 +160,9 @@ export const updateEwasteItem = async (req, res) => {
       // Allow updates to other fields
       Object.assign(item, req.body);
       const updatedItem = await item.save();
+
+       // 🔥 SYNC pickup requests
+      await syncPickupRequest(updatedItem);
       return res.status(200).json(updatedItem);
     }
 
@@ -165,6 +174,8 @@ export const updateEwasteItem = async (req, res) => {
 
       item.status = "picked-up";
       const updatedItem = await item.save();
+
+      await syncPickupRequest(updatedItem);
       return res.status(200).json(updatedItem);
     }
 
@@ -184,6 +195,7 @@ export const deleteEwasteItem = async (req, res) => {
 
     // 👑 Admin → can delete any item
     if (req.user.role === "ADMIN") {
+      await PickupRequest.deleteMany({ ewasteItemId: item._id });
       await item.deleteOne();
       return res.status(200).json({ message: "Item deleted successfully by admin" });
     }
@@ -193,6 +205,8 @@ export const deleteEwasteItem = async (req, res) => {
       if (item.owner.toString() !== req.user._id.toString()) {
         return res.status(403).json({ message: "Not authorized to delete this item" });
       }
+
+      await PickupRequest.deleteMany({ ewasteItemId: item._id });
 
       await item.deleteOne();
       return res.status(200).json({ message: "Item deleted successfully" });
@@ -208,4 +222,18 @@ export const deleteEwasteItem = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+const syncPickupRequest = async (item) => {
+  await PickupRequest.updateMany(
+    { ewasteItemId: item._id },
+    {
+      itemName: `${item.brand} ${item.deviceType}`,
+      condition: item.condition,
+      age: item.age,
+      weight: item.weight,
+      quantity: item.quantity,
+      disposalType: item.disposalType,
+    }
+  );
 };
