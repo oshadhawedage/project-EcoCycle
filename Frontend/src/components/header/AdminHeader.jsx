@@ -28,6 +28,7 @@ const Header = () => {
 
   const navLinks = [
     { name: 'Dashboard', path: '/admin/dashboard' },
+    { name: 'E-waste List', path: '/admin/ewaste' },
     { name: 'Records', path: '/admin/logs' },
     { name: 'Users', path: '/users' },
     { name: 'Recycler Requests', path: '/admin/recycler-requests' },
