@@ -32,18 +32,28 @@ const limiter = rateLimit({                     //megha
 });
 
 // Middleware
-app.use(cors());
 app.use(express.json()); // Body parser
 app.use(limiter); // Apply rate limiting to all requests        //megha
 
 // CORS configuration
-app.use(                                //megha
-  cors({
-    origin: process.env.CLIENT_URL || "*",
-    credentials: true
-  })
-);
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://project-eco-cycle.vercel.app"
+];
 
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 
 // Connect to MongoDB
 connectDB();
