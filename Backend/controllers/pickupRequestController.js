@@ -36,19 +36,27 @@ export const createRequest = async (req, res) => {
     }
 
     // 🔥 Decide address
+    // Decide pickup address
     let finalAddress = "";
 
-    if (item.useProfileAddress) {
-      const addr = user.address || {};
-      finalAddress = `${addr.street}, ${addr.city}, ${addr.district}, ${addr.province}, ${addr.country}`;
+    if (item.pickupAddress && item.pickupAddress.trim() !== "") {
+      // User entered a different address in e-waste item form
+      finalAddress = item.pickupAddress.trim();
     } else {
-      finalAddress = item.pickupAddress;
-    }
+      // Use address from user profile
+      const addr = user.address || {};
 
-    if (!finalAddress || finalAddress.trim() === "") {
-      return res.status(400).json({ message: "Pickup address not available" });
+      finalAddress = [
+        addr.street,
+        addr.city,
+        addr.district,
+        addr.province,
+        addr.country,
+      ]
+        .filter(Boolean)
+        .join(", ")
+        .trim();
     }
-
     // 🔹 Create pickup request
     const request = await PickupRequest.create({
       userId,
