@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { getMyEwasteItems, deleteEwasteItem, updateEwasteItem } from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import { getMyEwasteItems, deleteEwasteItem } from "../../services/api";
 
 const EwasteList = () => {
   const [items, setItems] = useState([]);
   const navigate = useNavigate();
-  const userRole = localStorage.getItem("userRole"); 
+  const userRole = localStorage.getItem("userRole") || "USER";
+  const isAdmin = userRole === "ADMIN";
+  const isUser = userRole === "USER";
+  const isRecycler = userRole === "RECYCLER";
 
   //console.log("Role:", userRole); // DEBUG
 
@@ -20,12 +23,11 @@ const EwasteList = () => {
   };
 
   const handleDelete = async (id) => {
-   if (!window.confirm("Are you sure you want to delete this item?")) return;
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
 
-   try {
+    try {
       await deleteEwasteItem(id);
       fetchItems(); // refresh list
-
     } catch (error) {
       alert(error?.response?.data?.message || "Delete failed");
     }
@@ -63,10 +65,18 @@ const EwasteList = () => {
           E-Waste Management
         </p>
         <h1 className="text-3xl md:text-5xl font-semibold mb-3">
-          My E-Waste Items
+          {isAdmin
+            ? "All E-Waste Items"
+            : isRecycler
+            ? "Available E-Waste Items"
+            : "My E-Waste Items"}
         </h1>
         <p className="text-white/90 max-w-2xl text-sm md:text-base">
-          Manage your electronic waste items and track their lifecycle.
+          {isAdmin
+            ? "View and manage every user's e-waste item."
+            : isRecycler
+            ? "Browse available e-waste items for pickup." 
+            : "Manage your electronic waste items and track their lifecycle."}
         </p>
       </div>
     </section>
@@ -75,16 +85,16 @@ const EwasteList = () => {
     <section className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
 
       {/* ADD BUTTON */}
-      {items.length > 0 && (
-      <div className="flex justify-end mb-6">
-      <button
-        onClick={() => navigate("/user/ewaste/create")}
-        className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90"
-      >
-        + Add New Item
-      </button>
-      </div>
-   )}
+      {isUser && items.length > 0 && (
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={() => navigate("/user/ewaste/create")}
+            className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90"
+          >
+            + Add New Item
+          </button>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="bg-white p-10 rounded-2xl border text-center shadow-sm flex flex-col items-center">
@@ -103,12 +113,20 @@ const EwasteList = () => {
      </p>
 
      {/* CTA Button */}
-     <button
-      onClick={() => navigate("/user/ewaste/create")}
-      className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90"
-     >
-      + Add Your First Item
-     </button>
+     {isUser ? (
+       <button
+         onClick={() => navigate("/user/ewaste/create")}
+         className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white px-6 py-3 rounded-xl text-sm font-medium hover:opacity-90"
+       >
+         + Add Your First Item
+       </button>
+     ) : (
+       <p className="text-sm text-slate-500 max-w-md">
+         {isAdmin
+           ? "There are no e-waste items in the system yet."
+           : "No e-waste items are available right now."}
+       </p>
+     )}
 
      </div>
       ) : (
@@ -135,6 +153,11 @@ const EwasteList = () => {
 
           {/* INFO GRID */}
           <div className="mt-3 space-y-1 text-sm text-slate-600">
+            {isAdmin && item.owner && (
+              <p>
+                Owner: <span className="text-slate-800">{typeof item.owner === "object" ? item.owner.fullName || item.owner.email || item.owner._id : item.owner}</span>
+              </p>
+            )}
             <p>
               Condition:{" "}
               <span className="text-slate-800">{item.condition}</span>
@@ -165,7 +188,16 @@ const EwasteList = () => {
 
         {/* ACTION BUTTONS */}
         <div className="flex gap-2 mt-5">
-          {userRole === "USER" && (item.status === "available" || item.status === "requested")&& (
+          {isAdmin && (
+            <button
+              onClick={() => handleDelete(item._id)}
+              className="flex-1 border border-red-500 text-red-500 py-2 rounded-lg text-sm hover:bg-red-500 hover:text-white transition"
+            >
+              Delete
+            </button>
+          )}
+
+          {isUser && (item.status === "available" || item.status === "requested") && (
             <>
               <button
                 onClick={() => navigate(`/user/ewaste/edit/${item._id}`)}
@@ -182,8 +214,6 @@ const EwasteList = () => {
               </button>
             </>
           )}
-
-        
         </div>
       </div>
     );
