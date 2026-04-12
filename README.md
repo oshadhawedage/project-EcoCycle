@@ -348,15 +348,7 @@ npm test
 
 ---
 
-# 👥 Group Details
 
-* Group ID: SE3040-XX
-* Member 1: Name (ID)
-* Member 2: Name (ID)
-* Member 3: Name (ID)
-* Member 4: Name (ID)
-
----
 
 #  Important Notes
 
