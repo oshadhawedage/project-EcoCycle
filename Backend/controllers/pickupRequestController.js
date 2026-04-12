@@ -56,6 +56,12 @@ export const createRequest = async (req, res) => {
        userName: user.fullName, // ✅ ADD THIS
       ewasteItemId: item._id,
       itemName: `${item.brand} ${item.deviceType}`,
+      // ===== NEW: ewaste item details saved into request =====
+      condition: item.condition,
+      age: item.age,
+      weight: item.weight,
+      disposalType: item.disposalType,
+
       quantity: quantity || 1,
       address: finalAddress,
       preferredDate: preferredDate || new Date(),
