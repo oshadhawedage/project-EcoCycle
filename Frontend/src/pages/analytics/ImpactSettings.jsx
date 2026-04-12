@@ -10,11 +10,14 @@ import {
 } from 'lucide-react';
 import { getSettings, updateSettings } from '../../services/api';
 
-
 import { PageShell } from '../../shared/PageShell';
 
 const ImpactSettings = () => {
   const [formData, setFormData] = useState({
+    co2FactorPerKg: '',
+    monthlyTargetKg: '',
+  });
+  const [errors, setErrors] = useState({
     co2FactorPerKg: '',
     monthlyTargetKg: '',
   });
@@ -40,15 +43,80 @@ const ImpactSettings = () => {
     fetchSettings();
   }, []);
 
+  const validateField = (name, value) => {
+    const raw = String(value ?? '').trim();
+
+    if (!raw) {
+      return 'This field is required.';
+    }
+
+    const numericValue = Number(raw);
+
+    if (Number.isNaN(numericValue)) {
+      return 'Please enter a valid number.';
+    }
+
+    if (numericValue < 0) {
+      return 'Value cannot be negative.';
+    }
+
+    if (name === 'co2FactorPerKg' && numericValue === 0) {
+      return 'CO₂ factor must be greater than 0.';
+    }
+
+    if (name === 'monthlyTargetKg' && numericValue < 1) {
+      return 'Monthly target must be at least 1 kg.';
+    }
+
+    return '';
+  };
+
+  const validateForm = () => {
+    const newErrors = {
+      co2FactorPerKg: validateField('co2FactorPerKg', formData.co2FactorPerKg),
+      monthlyTargetKg: validateField('monthlyTargetKg', formData.monthlyTargetKg),
+    };
+
+    setErrors(newErrors);
+
+    return !newErrors.co2FactorPerKg && !newErrors.monthlyTargetKg;
+  };
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name, value),
+    }));
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name, value),
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const isValid = validateForm();
+
+    if (!isValid) {
+      setMessage({
+        type: 'error',
+        text: 'Please correct the highlighted fields before saving.',
+      });
+      return;
+    }
+
     setSaving(true);
     setMessage(null);
 
@@ -83,6 +151,7 @@ const ImpactSettings = () => {
       icon: Leaf,
       unit: 'kg CO₂ / kg',
       step: '0.1',
+      min: '0',
       tone: 'text-[#0f55a7]',
       cardValue: `${formData.co2FactorPerKg || '—'}`,
       cardUnit: 'kg CO₂ / kg',
@@ -94,6 +163,7 @@ const ImpactSettings = () => {
       icon: Target,
       unit: 'kg',
       step: '1',
+      min: '0',
       tone: 'text-[#2a9322]',
       cardValue: `${formData.monthlyTargetKg || '—'}`,
       cardUnit: 'kg',
@@ -101,11 +171,7 @@ const ImpactSettings = () => {
   ];
 
   return (
-    <PageShell
-      loading={loading}
-     
-     
-    >
+    <PageShell loading={loading}>
       <div className="text-center mb-10">
         <p className="text-[#0f55a7] font-semibold text-sm mb-2 uppercase tracking-widest">
           EcoCycle Admin Portal
@@ -145,10 +211,10 @@ const ImpactSettings = () => {
               System Controls
             </div>
 
-           <h3 className="mt-5 text-3xl font-bold text-slate-950">
-  <span className="text-[#1055a7]">Configure analytics</span>{' '}
-  <span className="text-[#2a9322]">fundamentals</span>
-</h3>
+            <h3 className="mt-5 text-3xl font-bold text-slate-950">
+              <span className="text-[#1055a7]">Configure analytics</span>{' '}
+              <span className="text-[#2a9322]">fundamentals</span>
+            </h3>
 
             <p className="mt-4 text-slate-600 leading-8 max-w-xl">
               These values directly affect CO₂ calculations, dashboard summaries,
@@ -220,10 +286,12 @@ const ImpactSettings = () => {
             <form
               onSubmit={handleSubmit}
               className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8"
+              noValidate
             >
               <div className="space-y-8">
                 {inputFields.map((field) => {
                   const Icon = field.icon;
+                  const hasError = Boolean(errors[field.id]);
 
                   return (
                     <div key={field.id} className="grid md:grid-cols-[1fr_1.1fr] gap-5 items-start">
@@ -248,16 +316,27 @@ const ImpactSettings = () => {
                             id={field.id}
                             type="number"
                             step={field.step}
+                            min={field.min}
                             required
                             name={field.id}
                             value={formData[field.id]}
                             onChange={handleChange}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 pr-28 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                            onBlur={handleBlur}
+                            className={`w-full rounded-xl bg-slate-50 px-4 pr-28 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:bg-white focus:ring-4 ${
+                              hasError
+                                ? 'border border-red-300 focus:border-red-400 focus:ring-red-100'
+                                : 'border border-slate-200 focus:border-sky-400 focus:ring-sky-100'
+                            }`}
                           />
                           <span className="absolute right-4 top-3.5 text-xs font-bold text-slate-400 whitespace-nowrap">
                             {field.unit}
                           </span>
                         </div>
+                        {hasError && (
+                          <p className="mt-2 text-xs font-medium text-red-600">
+                            {errors[field.id]}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
@@ -272,7 +351,7 @@ const ImpactSettings = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                 className="bg-[#0f55a7] hover:bg-[#0c478d] text-white font-semibold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap"
+                  className="bg-[#0f55a7] hover:bg-[#0c478d] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-full transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap"
                 >
                   {saving ? (
                     <>

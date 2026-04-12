@@ -10,6 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
+  AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react';
 
 import {
@@ -46,6 +48,10 @@ import { PageShell, SummaryCard, SectionPanel } from '../../shared/PageShell';
 const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const MATERIAL_COLORS = ['#64748b', '#0f55a7', '#4db848', '#94a3b8', '#0ea5e9'];
+
+const VALID_TABS = ['overview', 'trends', 'materials', 'leaderboard', 'holiday_impact'];
+const VALID_OVERVIEW_PERIODS = ['all_time', 'this_year'];
+const VALID_TREND_RANGES = [6, 12];
 
 const pad2 = (value) => String(value).padStart(2, '0');
 
@@ -180,10 +186,44 @@ const AnalyticsDashboard = () => {
   const [trendRange, setTrendRange] = useState(6);
   const [nextHoliday, setNextHoliday] = useState(null);
   const [holidayComparison, setHolidayComparison] = useState(null);
+  const [validationMessage, setValidationMessage] = useState(null);
 
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [monthlyHolidays, setMonthlyHolidays] = useState([]);
   const [selectedHolidayDate, setSelectedHolidayDate] = useState(null);
+
+  useEffect(() => {
+    if (!validationMessage) return undefined;
+
+    const timer = setTimeout(() => setValidationMessage(null), 3500);
+    return () => clearTimeout(timer);
+  }, [validationMessage]);
+
+  useEffect(() => {
+    let corrected = false;
+
+    if (!VALID_TABS.includes(activeTab)) {
+      setActiveTab('overview');
+      corrected = true;
+    }
+
+    if (!VALID_OVERVIEW_PERIODS.includes(overviewPeriod)) {
+      setOverviewPeriod('all_time');
+      corrected = true;
+    }
+
+    if (!VALID_TREND_RANGES.includes(Number(trendRange))) {
+      setTrendRange(6);
+      corrected = true;
+    }
+
+    if (corrected) {
+      setValidationMessage({
+        type: 'error',
+        text: 'Invalid dashboard selection detected. Default values were restored.',
+      });
+    }
+  }, [activeTab, overviewPeriod, trendRange]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -266,6 +306,18 @@ const AnalyticsDashboard = () => {
 
     fetchMonthlyHolidays();
   }, [calendarMonth]);
+
+  useEffect(() => {
+    if (!selectedHolidayDate) return;
+
+    const exists = monthlyHolidays.some(
+      (holiday) => formatIsoDateOnly(holiday.isoDate) === selectedHolidayDate
+    );
+
+    if (!exists) {
+      setSelectedHolidayDate(monthlyHolidays[0] ? formatIsoDateOnly(monthlyHolidays[0].isoDate) : null);
+    }
+  }, [monthlyHolidays, selectedHolidayDate]);
 
   const { overview, trend, categories, leaderboard } = data;
 
@@ -350,7 +402,31 @@ const AnalyticsDashboard = () => {
     setCalendarMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
+  const handleSelectHolidayDate = (dateKey) => {
+    const exists = monthlyHolidays.some(
+      (holiday) => formatIsoDateOnly(holiday.isoDate) === dateKey
+    );
+
+    if (!exists) {
+      setValidationMessage({
+        type: 'error',
+        text: 'Please select a valid highlighted holiday date.',
+      });
+      return;
+    }
+
+    setSelectedHolidayDate(dateKey);
+  };
+
   const handleExportTrendCSV = () => {
+    if (!computed.chartTrend.length) {
+      setValidationMessage({
+        type: 'error',
+        text: 'No trend data available to export.',
+      });
+      return;
+    }
+
     const rows = [
       ['Month', 'Weight (kg)', 'CO2 Saved (kg)', 'Actions Count'],
       ...computed.chartTrend.map((item) => [
@@ -373,9 +449,22 @@ const AnalyticsDashboard = () => {
     document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
+
+    setValidationMessage({
+      type: 'success',
+      text: 'Trend report exported successfully.',
+    });
   };
 
   const handleExportOverviewReport = () => {
+    if (!overview) {
+      setValidationMessage({
+        type: 'error',
+        text: 'Overview data is not available to export.',
+      });
+      return;
+    }
+
     const rows = [
       ['Overview Report'],
       ['Period', overviewPeriod === 'all_time' ? 'All Time' : 'This Year'],
@@ -402,9 +491,22 @@ const AnalyticsDashboard = () => {
     document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
+
+    setValidationMessage({
+      type: 'success',
+      text: 'Overview report exported successfully.',
+    });
   };
 
   const handleExportLeaderboardPDF = () => {
+    if (!computed.top5.length) {
+      setValidationMessage({
+        type: 'error',
+        text: 'No leaderboard data available to export.',
+      });
+      return;
+    }
+
     const doc = new jsPDF();
 
     doc.setFontSize(18);
@@ -449,10 +551,15 @@ const AnalyticsDashboard = () => {
     doc.text(`Total ranked users shown: ${computed.top5.length}`, 14, finalY + 12);
 
     doc.save('ecocycle-leaderboard-report.pdf');
+
+    setValidationMessage({
+      type: 'success',
+      text: 'Leaderboard PDF exported successfully.',
+    });
   };
 
   const smallPrimaryButton =
-    'bg-[#0f55a7] hover:bg-[#0c478d] text-white font-semibold px-5 py-2.5 rounded-full transition-colors flex items-center gap-2 shadow-sm w-max text-sm';
+    'bg-[#0f55a7] hover:bg-[#0c478d] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold px-5 py-2.5 rounded-full transition-colors flex items-center gap-2 shadow-sm w-max text-sm';
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -492,7 +599,11 @@ const AnalyticsDashboard = () => {
                   </button>
                 </div>
 
-                <button onClick={handleExportTrendCSV} className={smallPrimaryButton}>
+                <button
+                  onClick={handleExportTrendCSV}
+                  className={smallPrimaryButton}
+                  disabled={!computed.chartTrend.length}
+                >
                   Export Chart <Download className="w-4 h-4" />
                 </button>
               </>
@@ -615,7 +726,11 @@ const AnalyticsDashboard = () => {
                   overall impact.
                 </p>
 
-                <button onClick={handleExportLeaderboardPDF} className={smallPrimaryButton}>
+                <button
+                  onClick={handleExportLeaderboardPDF}
+                  className={smallPrimaryButton}
+                  disabled={!computed.top5.length}
+                >
                   View Full Report <ArrowRight className="w-4 h-4" />
                 </button>
               </>
@@ -675,7 +790,7 @@ const AnalyticsDashboard = () => {
                   onNextMonth={handleNextCalendarMonth}
                   holidays={monthlyHolidays}
                   selectedHolidayDate={selectedHolidayDate}
-                  onSelectHolidayDate={setSelectedHolidayDate}
+                  onSelectHolidayDate={handleSelectHolidayDate}
                 />
 
                 <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm max-w-[320px]">
@@ -785,7 +900,8 @@ const AnalyticsDashboard = () => {
                 <div className="flex items-center gap-6">
                   <button
                     onClick={handleExportOverviewReport}
-                    className="text-slate-600 font-semibold text-sm hover:text-[#0f55a7] transition-colors flex items-center gap-1 group"
+                    className="text-slate-600 disabled:text-slate-300 disabled:cursor-not-allowed font-semibold text-sm hover:text-[#0f55a7] transition-colors flex items-center gap-1 group"
+                    disabled={!overview}
                   >
                     Detailed Report
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -814,7 +930,7 @@ const AnalyticsDashboard = () => {
                       <span className="text-lg text-slate-400"> kg</span>
                     </>
                   }
-                   tone="text-[#2a9322]"
+                  tone="text-[#2a9322]"
                 />
 
                 <SummaryCard
@@ -879,11 +995,30 @@ const AnalyticsDashboard = () => {
         <p className="text-[#0f55a7] font-semibold text-sm mb-2 uppercase tracking-widest">
           EcoCycle Admin Portal
         </p>
-     <h2 className="text-3xl md:text-4xl font-bold">
-  <span className="text-[#1055a7]">What data do you</span>{' '}
-  <span className="text-[#2a9322]">want to view today?</span>
-</h2>
+        <h2 className="text-3xl md:text-4xl font-bold">
+          <span className="text-[#1055a7]">What data do you</span>{' '}
+          <span className="text-[#2a9322]">want to view today?</span>
+        </h2>
       </div>
+
+      {validationMessage && (
+        <div className="max-w-5xl mx-auto mb-8">
+          <div
+            className={`rounded-xl border px-4 py-3 flex items-center gap-3 shadow-sm ${
+              validationMessage.type === 'success'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-red-50 border-red-200 text-red-800'
+            }`}
+          >
+            {validationMessage.type === 'success' ? (
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+            )}
+            <span className="text-sm font-semibold">{validationMessage.text}</span>
+          </div>
+        </div>
+      )}
 
       <div className="mb-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
         <div className="flex items-start gap-4">

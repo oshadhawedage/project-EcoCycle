@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   SlidersHorizontal,
   CalendarRange,
+  AlertTriangle,
 } from 'lucide-react';
 import { getImpactLogs } from '../../services/api';
 
@@ -19,12 +20,39 @@ import recordBanner from '../../assets/RecordBanner.png';
 
 import { PageShell, SummaryCard } from '../../shared/PageShell';
 
+const VALID_ACTIONS = ['RECYCLE', 'DONATE', 'SELL'];
+const VALID_CATEGORIES = ['Laptop', 'Phone', 'Battery', 'Cable', 'CRT', 'PCB'];
+const MAX_SEARCH_LENGTH = 100;
+
 const ImpactLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionFilter, setActionFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchError, setSearchError] = useState('');
+  const [filterMessage, setFilterMessage] = useState('');
+
+  useEffect(() => {
+    if (!filterMessage) return undefined;
+
+    const timer = setTimeout(() => setFilterMessage(''), 3000);
+    return () => clearTimeout(timer);
+  }, [filterMessage]);
+
+  useEffect(() => {
+    if (actionFilter && !VALID_ACTIONS.includes(actionFilter)) {
+      setActionFilter('');
+      setFilterMessage('Invalid action filter detected. It was reset.');
+    }
+  }, [actionFilter]);
+
+  useEffect(() => {
+    if (categoryFilter && !VALID_CATEGORIES.includes(categoryFilter)) {
+      setCategoryFilter('');
+      setFilterMessage('Invalid category filter detected. It was reset.');
+    }
+  }, [categoryFilter]);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -51,10 +79,20 @@ const ImpactLogs = () => {
       maximumFractionDigits: 1,
     });
 
-  const filteredLogs = useMemo(() => {
-    const keyword = searchTerm.trim().toLowerCase();
+  const validatedKeyword = useMemo(() => {
+    const value = searchTerm.trim();
 
-    if (!keyword) return logs;
+    if (!value) return '';
+
+    if (value.length > MAX_SEARCH_LENGTH) {
+      return '';
+    }
+
+    return value.toLowerCase();
+  }, [searchTerm]);
+
+  const filteredLogs = useMemo(() => {
+    if (!validatedKeyword) return logs;
 
     return logs.filter((item) => {
       const createdAt = item.createdAt
@@ -62,13 +100,13 @@ const ImpactLogs = () => {
         : '';
 
       return (
-        item.userName?.toLowerCase().includes(keyword) ||
-        item.actionType?.toLowerCase().includes(keyword) ||
-        item.category?.toLowerCase().includes(keyword) ||
-        createdAt.includes(keyword)
+        item.userName?.toLowerCase().includes(validatedKeyword) ||
+        item.actionType?.toLowerCase().includes(validatedKeyword) ||
+        item.category?.toLowerCase().includes(validatedKeyword) ||
+        createdAt.includes(validatedKeyword)
       );
     });
-  }, [logs, searchTerm]);
+  }, [logs, validatedKeyword]);
 
   const stats = useMemo(() => {
     const totalLogs = filteredLogs.length;
@@ -118,11 +156,23 @@ const ImpactLogs = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+
+    setSearchTerm(value);
+
+    if (value.trim().length > MAX_SEARCH_LENGTH) {
+      setSearchError(`Search must be ${MAX_SEARCH_LENGTH} characters or fewer.`);
+      return;
+    }
+
+    setSearchError('');
+  };
+
   return (
     <PageShell
       banner={recordBanner}
       bannerAlt="Impact records banner"
-   
       loading={loading}
     >
       <div className="text-center mb-10">
@@ -138,6 +188,15 @@ const ImpactLogs = () => {
         </p>
       </div>
 
+      {filterMessage && (
+        <div className="max-w-5xl mx-auto mb-8">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-3 shadow-sm text-amber-800">
+            <AlertTriangle className="w-5 h-5 shrink-0" />
+            <span className="text-sm font-semibold">{filterMessage}</span>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden mb-8">
         <div className="grid lg:grid-cols-[1.3fr_0.7fr]">
           <div className="p-8 md:p-10">
@@ -145,10 +204,10 @@ const ImpactLogs = () => {
               Operational Ledger
             </div>
 
-           <h3 className="mt-5 text-3xl font-bold">
-  <span className="text-[#1055a7]">Track every impact</span>{' '}
-  <span className="text-[#2a9322]">entry with precision</span>
-</h3>
+            <h3 className="mt-5 text-3xl font-bold">
+              <span className="text-[#1055a7]">Track every impact</span>{' '}
+              <span className="text-[#2a9322]">entry with precision</span>
+            </h3>
 
             <p className="mt-4 text-slate-600 leading-8 max-w-2xl">
               Filter impact records by action and category, inspect platform-wide material
@@ -266,9 +325,16 @@ const ImpactLogs = () => {
                   type="text"
                   placeholder="Search logs..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full min-w-[210px] rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                  onChange={handleSearchChange}
+                  className={`w-full min-w-[210px] rounded-xl border bg-slate-50 pl-10 pr-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:bg-white focus:ring-4 ${
+                    searchError
+                      ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                      : 'border-slate-200 focus:border-sky-400 focus:ring-sky-100'
+                  }`}
                 />
+                {searchError && (
+                  <p className="mt-2 text-xs font-medium text-red-600">{searchError}</p>
+                )}
               </div>
 
               <div className="relative">
