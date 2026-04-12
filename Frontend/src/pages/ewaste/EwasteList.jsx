@@ -46,14 +46,7 @@ const EwasteList = () => {
   }
 };
 
-  const handlePickup = async (id) => {
-    try {
-       await updateEwasteItem(id, { status: "picked-up" });
-       fetchItems();
-    } catch (error) {
-    alert("Failed to update status");
-    }
-  };
+  
 
   useEffect(() => {
     fetchItems();
@@ -172,7 +165,7 @@ const EwasteList = () => {
 
         {/* ACTION BUTTONS */}
         <div className="flex gap-2 mt-5">
-          {userRole === "USER" && (
+          {userRole === "USER" && (item.status === "available" || item.status === "requested")&& (
             <>
               <button
                 onClick={() => navigate(`/user/ewaste/edit/${item._id}`)}
@@ -190,14 +183,7 @@ const EwasteList = () => {
             </>
           )}
 
-          {userRole === "RECYCLER" && item.status === "available" && (
-            <button
-              onClick={() => handlePickup(item._id)}
-              className="w-full bg-blue-500 text-white py-2 rounded-lg text-sm hover:bg-blue-600 transition"
-            >
-              Mark as Picked-Up
-            </button>
-          )}
+        
         </div>
       </div>
     );

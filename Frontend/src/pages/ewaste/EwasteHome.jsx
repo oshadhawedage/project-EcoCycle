@@ -21,7 +21,7 @@ const EwasteHome = () => {
 
   // ✅ Stats
   const total = items.length;
-  const available = items.filter(i => i.status === "available").length;
+  const available = items.filter(i => i.status === "available" || i.status === "requested").length;
   const picked = items.filter(i => i.status === "picked-up").length;
   const recycled = items.filter(i => i.status === "recycled").length;
 

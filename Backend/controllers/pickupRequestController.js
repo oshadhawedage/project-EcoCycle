@@ -167,20 +167,31 @@ export const updateStatus = async (req, res) => {
       return res.status(404).json({ message: "Not found" });
     }
 
+    // ✅ Update PickupRequest
     request.status = status;
-
     const updated = await request.save();
 
-    // 🔥 CREATE IMPACT LOG WHEN COMPLETED
+    // 🔥 IMPORTANT: Sync EwasteItem
+    const item = await EwasteItem.findById(request.ewasteItemId);
+
+    if (item) {
+      if (status === "Accepted") {
+        item.status = "requested";
+      } else if (status === "Collected") {
+        item.status = "picked-up";
+      } else if (status === "Completed") {
+        item.status = "recycled";
+      }
+
+      await item.save();
+    }
+
+    // 🔥 IMPACT LOG (keep your logic)
     if (status === "Completed") {
-
       const settings = await getOrCreateSettings();
-
       const factor = settings.co2FactorPerKg ?? 3;
 
-      // simple estimated weight calculation
       const weightKg = request.quantity * 0.5;
-
       const co2SavedKg = weightKg * factor;
 
       await ImpactLog.create({
@@ -193,7 +204,7 @@ export const updateStatus = async (req, res) => {
       });
     }
 
-    // Send email
+    // 📧 Email
     await sendStatusEmail({
       to: updated.email,
       itemName: updated.itemName,

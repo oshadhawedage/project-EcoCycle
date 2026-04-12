@@ -16,6 +16,7 @@ const EditEwaste = () => {
     age: "",
     weight: "",
     disposalType: "",
+    quantity: 1,
   });
 
   
@@ -37,6 +38,7 @@ const EditEwaste = () => {
         age: item.age,
         weight: item.weight,
         disposalType: item.disposalType,
+        quantity: item.quantity || 1,
       });
 
       setUseProfileAddress(item.useProfileAddress ?? true);
@@ -178,6 +180,20 @@ const EditEwaste = () => {
             placeholder="Weight (kg)"
             className="w-full border rounded-xl px-4 py-3"
           />
+
+          {/* Quantity */}
+          <div>
+          <label className="block text-sm font-medium mb-2">Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            value={formData.quantity}
+            onChange={handleChange}
+            min="1"
+            required
+            className="w-full border rounded-xl px-4 py-3"
+          />
+         </div>
 
           {/* Disposal Type */}
           <select
