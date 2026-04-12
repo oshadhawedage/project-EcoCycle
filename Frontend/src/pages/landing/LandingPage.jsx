@@ -36,6 +36,7 @@ import mobileImage from '../../assets/categories/mobile.png';
 import laptopImage from '../../assets/categories/laptop.png';
 import tvImage from '../../assets/categories/tv.png';
 import accessoriesImage from '../../assets/categories/accessories.png';
+import banner5 from '../../assets/banners/banner5.png';
 
 const HERO_SLIDES = [
   {
@@ -608,52 +609,57 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* FINAL CTA */}
-        <section id="contact" className="py-16 bg-slate-100">
-          <div className="max-w-[1400px] mx-auto px-6">
-            <div
-              className="rounded-[32px] bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white p-10 md:p-14 shadow-xl"
-              data-aos="fade-up"
-            >
-              <div className="max-w-3xl">
-                <p className="uppercase tracking-[0.2em] text-sm text-white/80 mb-3">
-                  Ready to Start?
-                </p>
-                <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-5">
-                  Create a stronger recycling experience with EcoCycle.
-                </h2>
-                <p className="text-white/90 text-base md:text-lg leading-8 mb-8">
-                  Build trust, communicate environmental value, and support better operations with
-                  a modern e-waste platform designed for long-term impact.
-                </p>
+{/* FINAL CTA BANNER */}
+<section id="contact" className="relative bg-white">
+  <img
+    src={banner5}
+    alt="EcoCycle support banner"
+    className="w-full h-auto object-cover block"
+  />
 
-                <div className="flex flex-wrap gap-4">
-                  <Link
-                    to="/register"
-                    className="bg-white text-[#0f55a7] px-6 py-3 rounded-full font-semibold hover:scale-105 transition"
-                  >
-                    Create Account
-                  </Link>
+  {/* 🔥 DARK GRADIENT OVERLAY */}
+  <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
 
-                  <Link
-                    to="/login"
-                    className="border border-white/40 px-6 py-3 rounded-full font-semibold hover:bg-white/10 transition"
-                  >
-                    Sign In
-                  </Link>
+  <div className="absolute inset-0 flex items-center">
+    <div className="max-w-[1400px] mx-auto w-full px-6">
+      <div className="max-w-[500px] text-white">
 
-                  <a
-                    href="tel:+94000000000"
-                    className="border border-white/40 px-6 py-3 rounded-full font-semibold hover:bg-white/10 transition inline-flex items-center gap-2"
-                  >
-                    <PhoneCall className="w-4 h-4" />
-                    Contact Team
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* label */}
+        <p className="uppercase tracking-[0.15em] text-xs text-white/80 mb-2">
+          Ready to Start?
+        </p>
+
+        {/* heading */}
+        <h2 className="text-2xl md:text-4xl font-semibold leading-[1.2] mb-4">
+          Create a stronger recycling experience.
+        </h2>
+
+        {/* description */}
+        <p className="text-sm md:text-base text-white/90 leading-6 mb-6">
+          Manage e-waste responsibly with a smarter platform.
+        </p>
+
+        {/* buttons */}
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/register"
+            className="bg-white text-[#0f55a7] px-6 py-3 rounded-full text-sm font-semibold hover:scale-105 transition"
+          >
+            Create Account
+          </Link>
+
+          <Link
+            to="/login"
+            className="border border-white/40 px-6 py-3 rounded-full text-sm font-semibold text-white hover:bg-white/10 transition"
+          >
+            Sign In
+          </Link>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
       </div>
     </LandingPageLayout>
   );
