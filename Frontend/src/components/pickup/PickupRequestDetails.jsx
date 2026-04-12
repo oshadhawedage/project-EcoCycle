@@ -149,13 +149,7 @@ const PickupRequestDetails = ({
                 <span><strong>Email:</strong> {request.email}</span>
               </div>
 
-              <div className="flex items-center gap-3">
-                <CalendarDays className="w-4 h-4 text-[#0f55a7]" />
-                <span>
-                  <strong>Preferred Date:</strong>{" "}
-                  {new Date(request.preferredDate).toLocaleDateString()}
-                </span>
-              </div>
+              
 
               <div className="flex items-center gap-3">
                 <Clock3 className="w-4 h-4 text-[#0f55a7]" />
