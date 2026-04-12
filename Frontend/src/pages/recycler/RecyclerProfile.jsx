@@ -181,51 +181,69 @@ const RecyclerProfile = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="flex flex-col items-center gap-4">
-          <Loader className="w-12 h-12 text-[#0f55a7] animate-spin" strokeWidth={1.5} />
-          <p className="text-gray-600 font-medium">Loading profile...</p>
+          <div className="p-3 bg-blue-100/60 rounded-full">
+            <Loader className="w-8 h-8 text-blue-700 animate-spin" strokeWidth={1.5} />
+          </div>
+          <p className="text-slate-700 font-semibold">Loading your profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100 p-6 lg:p-8">
+      <div className="max-w-3xl mx-auto">
         
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Briefcase className="w-8 h-8 text-[#0f55a7]" strokeWidth={2.0} />
-            Recycler Profile
-          </h1>
-          <p className="text-gray-600 mt-2">Manage your recycler account and business information</p>
+        <div className="mb-10">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900 flex items-center gap-3">
+                <div className="p-2.5 bg-blue-100/80 rounded-xl">
+                  <Briefcase className="w-7 h-7 text-blue-700" strokeWidth={2.0} />
+                </div>
+                Recycler Profile
+              </h1>
+              <p className="text-slate-600 mt-2 text-base">Manage your business account and service information</p>
+            </div>
+          </div>
         </div>
 
         {/* Message */}
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.includes('✅') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          <div className={`mb-6 p-4 rounded-lg border ${
+            message.includes('✅') 
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-800' 
+              : 'border-red-200 bg-red-50 text-red-800'
           }`}>
             <p className="text-sm font-medium">{message}</p>
           </div>
         )}
 
         {/* Profile Card */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] p-8 text-white">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold">
-                {recyclerData?.fullName?.charAt(0) || 'R'}
+          <div className="bg-linear-to-r from-blue-600 via-blue-700 to-cyan-600 p-8 text-white">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 rounded-2xl bg-white/15 flex items-center justify-center text-3xl font-bold border border-white/20 backdrop-blur-sm">
+                {recyclerData?.fullName?.charAt(0)?.toUpperCase() || 'R'}
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">{recyclerData?.fullName}</h2>
-                <p className="text-white/80">{recyclerData?.email}</p>
-                <span className="inline-block mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
-                  {recyclerData?.role}
-                </span>
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold">{recyclerData?.fullName}</h2>
+                <p className="text-white/85 text-base mt-1">{recyclerData?.email}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold border border-white/20">
+                    🏢 {recyclerData?.role === 'recycler' ? 'Recycler' : recyclerData?.role}
+                  </span>
+                  {recyclerData?.isEmailVerified && (
+                    <span className="inline-block px-3 py-1 bg-emerald-400/30 backdrop-blur-sm rounded-full text-xs font-semibold border border-emerald-300/50 flex items-center gap-1.5">
+                      <CheckCircle className="w-3.5 h-3.5" strokeWidth={2.0} />
+                      Verified
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -301,14 +319,14 @@ const RecyclerProfile = () => {
             </div>
 
             {isEditing && editSection === 'personal' && (
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-8 pt-6 border-t border-slate-200">
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" strokeWidth={2.0} />
-                  {isSaving ? 'Saving...' : 'Save'}
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
                   onClick={() => {
@@ -316,7 +334,7 @@ const RecyclerProfile = () => {
                     setEditSection(null);
                     setFormData(recyclerData);
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-all font-medium text-sm"
                 >
                   <X className="w-4 h-4" strokeWidth={2.0} />
                   Cancel
@@ -423,14 +441,14 @@ const RecyclerProfile = () => {
             </div>
 
             {isEditing && editSection === 'business' && (
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-8 pt-6 border-t border-slate-200">
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" strokeWidth={2.0} />
-                  {isSaving ? 'Saving...' : 'Save'}
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
                   onClick={() => {
@@ -438,7 +456,7 @@ const RecyclerProfile = () => {
                     setEditSection(null);
                     setFormData(recyclerData);
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-all font-medium text-sm"
                 >
                   <X className="w-4 h-4" strokeWidth={2.0} />
                   Cancel
@@ -448,10 +466,12 @@ const RecyclerProfile = () => {
           </div>
 
           {/* Address Section */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#0f55a7]" strokeWidth={2.0} />
+          <div className="p-8 border-b border-slate-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-3">
+                <div className="p-2 bg-cyan-100/60 rounded-lg">
+                  <MapPin className="w-5 h-5 text-cyan-700" strokeWidth={2.0} />
+                </div>
                 Service Address
               </h3>
               {!isEditing && (
@@ -460,18 +480,18 @@ const RecyclerProfile = () => {
                     setEditSection('address');
                     setIsEditing(true);
                   }}
-                  className="flex items-center gap-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-blue-700 hover:bg-blue-50 rounded-lg transition-all font-medium text-sm"
                 >
                   <Edit2 className="w-4 h-4" strokeWidth={2.0} />
-                  <span className="text-sm">Edit</span>
+                  Edit
                 </button>
               )}
             </div>
 
-            <div className="space-y-4">
+            <div className="grid gap-6 sm:grid-cols-2">
               {/* Street */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Street</label>
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Street Address</label>
                 {isEditing && editSection === 'address' ? (
                   <input
                     type="text"
@@ -479,16 +499,16 @@ const RecyclerProfile = () => {
                     value={formData.address?.street || ''}
                     onChange={handleAddressChange}
                     placeholder="Enter street address"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f55a7]"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                   />
                 ) : (
-                  <p className="text-gray-700">{recyclerData?.address?.street || 'Not provided'}</p>
+                  <p className="text-slate-900 font-medium">{recyclerData?.address?.street || '—'}</p>
                 )}
               </div>
 
               {/* City */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">City</label>
                 {isEditing && editSection === 'address' ? (
                   <input
                     type="text"
@@ -496,45 +516,45 @@ const RecyclerProfile = () => {
                     value={formData.address?.city || ''}
                     onChange={handleAddressChange}
                     placeholder="Enter city"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f55a7]"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                   />
                 ) : (
-                  <p className="text-gray-700">{recyclerData?.address?.city || 'Not provided'}</p>
+                  <p className="text-slate-900 font-medium">{recyclerData?.address?.city || '—'}</p>
                 )}
               </div>
 
-              {/* Province & Postal */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Province</label>
-                  {isEditing && editSection === 'address' ? (
-                    <input
-                      type="text"
-                      name="province"
-                      value={formData.address?.province || ''}
-                      onChange={handleAddressChange}
-                      placeholder="Province"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f55a7]"
-                    />
-                  ) : (
-                    <p className="text-gray-700">{recyclerData?.address?.province || 'Not provided'}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Postal Code</label>
-                  {isEditing && editSection === 'address' ? (
-                    <input
-                      type="text"
-                      name="postalCode"
-                      value={formData.address?.postalCode || ''}
-                      onChange={handleAddressChange}
-                      placeholder="Postal code"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f55a7]"
-                    />
-                  ) : (
-                    <p className="text-gray-700">{recyclerData?.address?.postalCode || 'Not provided'}</p>
-                  )}
-                </div>
+              {/* Province */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Province</label>
+                {isEditing && editSection === 'address' ? (
+                  <input
+                    type="text"
+                    name="province"
+                    value={formData.address?.province || ''}
+                    onChange={handleAddressChange}
+                    placeholder="Enter province"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                  />
+                ) : (
+                  <p className="text-slate-900 font-medium">{recyclerData?.address?.province || '—'}</p>
+                )}
+              </div>
+
+              {/* Postal Code */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Postal Code</label>
+                {isEditing && editSection === 'address' ? (
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={formData.address?.postalCode || ''}
+                    onChange={handleAddressChange}
+                    placeholder="Enter postal code"
+                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                  />
+                ) : (
+                  <p className="text-slate-900 font-medium">{recyclerData?.address?.postalCode || '—'}</p>
+                )}
               </div>
             </div>
 

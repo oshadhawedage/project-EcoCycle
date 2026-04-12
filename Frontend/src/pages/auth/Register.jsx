@@ -144,16 +144,24 @@ const Register = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    if (formData.city && !formData.city.trim()) {
+    if (!formData.street.trim()) {
+      newErrors.street = 'Street address is required';
+    }
+
+    if (!formData.city.trim()) {
       newErrors.city = 'City is required';
     }
 
-    if (formData.district && !formData.district.trim()) {
+    if (!formData.district.trim()) {
       newErrors.district = 'District is required';
     }
 
-    if (formData.province && !formData.province.trim()) {
+    if (!formData.province.trim()) {
       newErrors.province = 'Province is required';
+    }
+
+    if (!formData.postalCode.trim()) {
+      newErrors.postalCode = 'Postal code is required';
     }
 
     setErrors(newErrors);
@@ -459,58 +467,93 @@ const Register = () => {
                     className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-left text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-slate-100"
                   >
                     <span>
-                      Address <span className="font-normal text-slate-500">(Optional)</span>
+                      Address <span className="font-normal text-slate-400 text-xs">(Required)</span> <span className="text-red-600">*</span>
                     </span>
                     <span className={`transition-transform ${expandAddress ? 'rotate-180' : ''}`}>▼</span>
                   </button>
 
                   {expandAddress && (
                     <div className="mt-4 space-y-4 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
-                      <input
-                        type="text"
-                        name="street"
-                        value={formData.street}
-                        onChange={handleChange}
-                        placeholder="Street Address"
-                        className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 focus:ring-emerald-100"
-                      />
-
-                      <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
                         <input
                           type="text"
-                          name="city"
-                          value={formData.city}
+                          name="street"
+                          value={formData.street}
                           onChange={handleChange}
-                          placeholder="City"
-                          className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 focus:ring-emerald-100"
+                          placeholder="Street Address"
+                          className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 ${
+                            errors.street
+                              ? 'border-red-300 focus:ring-red-100'
+                              : 'border-emerald-100 focus:ring-emerald-100'
+                          }`}
                         />
-                        <input
-                          type="text"
-                          name="district"
-                          value={formData.district}
-                          onChange={handleChange}
-                          placeholder="District"
-                          className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 focus:ring-emerald-100"
-                        />
+                        {errors.street && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.street}</p>}
                       </div>
 
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <input
-                          type="text"
-                          name="province"
-                          value={formData.province}
-                          onChange={handleChange}
-                          placeholder="Province"
-                          className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 focus:ring-emerald-100"
-                        />
-                        <input
-                          type="text"
-                          name="postalCode"
-                          value={formData.postalCode}
-                          onChange={handleChange}
-                          placeholder="Postal Code"
-                          className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 focus:ring-emerald-100"
-                        />
+                        <div>
+                          <input
+                            type="text"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            placeholder="City"
+                            className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 ${
+                              errors.city
+                                ? 'border-red-300 focus:ring-red-100'
+                                : 'border-emerald-100 focus:ring-emerald-100'
+                            }`}
+                          />
+                          {errors.city && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.city}</p>}
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            name="district"
+                            value={formData.district}
+                            onChange={handleChange}
+                            placeholder="District"
+                            className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 ${
+                              errors.district
+                                ? 'border-red-300 focus:ring-red-100'
+                                : 'border-emerald-100 focus:ring-emerald-100'
+                            }`}
+                          />
+                          {errors.district && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.district}</p>}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <input
+                            type="text"
+                            name="province"
+                            value={formData.province}
+                            onChange={handleChange}
+                            placeholder="Province"
+                            className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 ${
+                              errors.province
+                                ? 'border-red-300 focus:ring-red-100'
+                                : 'border-emerald-100 focus:ring-emerald-100'
+                            }`}
+                          />
+                          {errors.province && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.province}</p>}
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            name="postalCode"
+                            value={formData.postalCode}
+                            onChange={handleChange}
+                            placeholder="Postal Code"
+                            className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none focus:ring-4 ${
+                              errors.postalCode
+                                ? 'border-red-300 focus:ring-red-100'
+                                : 'border-emerald-100 focus:ring-emerald-100'
+                            }`}
+                          />
+                          {errors.postalCode && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.postalCode}</p>}
+                        </div>
                       </div>
                     </div>
                   )}
