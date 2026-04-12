@@ -41,6 +41,29 @@ const pickupRequestSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // ===== NEW: store ewaste item info in pickup request =====
+    condition: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    age: {
+      type: Number,
+      default: null,
+    },
+
+    weight: {
+      type: Number,
+      default: null,
+    },
+
+    disposalType: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     // Quantity of items
     quantity: {
       type: Number,

@@ -1,6 +1,6 @@
 //PickupRequestDetails.jsx
 import React, { useMemo } from "react";
-import {CalendarDays, Clock3, Mail, MapPin, Package, CheckCircle2, Truck, UserRound, Hash
+import {CalendarDays, Clock3, Mail, MapPin, Package, CheckCircle2, Truck, UserRound, Hash, Wrench, Cpu, Weight, Recycle
 } from "lucide-react";
 import PickupStatusBadge from "./PickupStatusBadge";
 
@@ -109,6 +109,36 @@ const PickupRequestDetails = ({
                 <span><strong>Quantity:</strong> {request.quantity}</span>
               </div>
 
+              {/* ===== E-WASTE ITEM DETAILS ===== */}
+              {request.condition && (
+                <div className="flex items-center gap-3">
+                  <Wrench className="w-4 h-4 text-[#0f55a7]" />
+                  <span><strong>Condition:</strong> {request.condition}</span>
+                </div>
+              )}
+
+              {request.age !== null && request.age !== undefined && (
+                <div className="flex items-center gap-3">
+                  <Cpu className="w-4 h-4 text-[#0f55a7]" />
+                  <span><strong>Age:</strong> {request.age} years</span>
+                </div>
+              )}
+
+              {request.weight !== null && request.weight !== undefined && (
+                <div className="flex items-center gap-3">
+                  <Weight className="w-4 h-4 text-[#0f55a7]" />
+                  <span><strong>Weight:</strong> {request.weight} kg</span>
+                </div>
+              )}
+
+              {request.disposalType && (
+                <div className="flex items-center gap-3">
+                  <Recycle className="w-4 h-4 text-[#0f55a7]" />
+                  <span><strong>Disposal:</strong> {request.disposalType}</span>
+                </div>
+              )}
+
+
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-[#0f55a7]" />
                 <span><strong>Address:</strong> {request.address}</span>
@@ -117,6 +147,14 @@ const PickupRequestDetails = ({
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-[#0f55a7]" />
                 <span><strong>Email:</strong> {request.email}</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <CalendarDays className="w-4 h-4 text-[#0f55a7]" />
+                <span>
+                  <strong>Preferred Date:</strong>{" "}
+                  {new Date(request.preferredDate).toLocaleDateString()}
+                </span>
               </div>
 
               <div className="flex items-center gap-3">
