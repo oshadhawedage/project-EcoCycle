@@ -25,6 +25,8 @@ dotenv.config();
 // Create express app
 const app = express();
 
+app.set('trust proxy', 1);
+
 // Rate limiting (anti-spam/DDoS protection)
 const limiter = rateLimit({                     //megha
   windowMs: 60 * 1000, // 1 minute window
