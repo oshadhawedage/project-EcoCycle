@@ -46,7 +46,7 @@ import UserManagement from "./pages/admin/Users";
 import AdminProfile from "./pages/admin/AdminProfile";
 
 // Other Pages
-import RecyclerPickupsPage from "./pages/pickups/RecyclerPickupsPage"; // recycler
+import RecyclerPickupsPage from "./pages/recycler/RecyclerPickupsPage"; // recycler
 
 
 function App() {

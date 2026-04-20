@@ -1,4 +1,12 @@
 //PickupRequestCard.jsx
+// Purpose:
+// - Small clickable summary card for a single pickup request.
+// - Used in the pickups list; clicking selects a request and opens details.
+//
+// Props:
+// - request: pickup request object (expects `_id`, `itemName`, `status`, `quantity`, `address`, `userName`, `email`)
+// - selected: highlights the card when true
+// - onClick: called when the card is clicked
 import React from "react";
 import { CalendarDays, MapPin, Package, UserRound } from "lucide-react";
 import PickupStatusBadge from "./PickupStatusBadge";
@@ -7,6 +15,8 @@ const PickupRequestCard = ({ request, selected, onClick }) => {
   return (
     <button
       onClick={onClick}
+      // Styling note:
+      // - Uses different border/background when the card is selected.
       className={`w-full text-left rounded-2xl border p-5 cursor-pointer transition-all duration-200 shadow-sm
         hover:border-[#4db848] hover:bg-green-50 hover:shadow-lg hover:scale-[1.01]
         ${

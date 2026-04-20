@@ -1,4 +1,7 @@
 //PickupStatusBadge.jsx
+// Purpose:
+// - Shows a colored label for the current pickup request status.
+// - Colors are mapped in `statusStyles`.
 import React from "react";
 
 const statusStyles = {
@@ -11,6 +14,7 @@ const statusStyles = {
 const PickupStatusBadge = ({ status }) => {
   return (
     <span
+      // If status is unknown/missing, fall back to a neutral style.
       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
         statusStyles[status] || "bg-slate-100 text-slate-700 border border-slate-200"
       }`}

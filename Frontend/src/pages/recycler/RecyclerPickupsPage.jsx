@@ -1,8 +1,15 @@
 //RecyclerPickupsPage.jsx
+// Purpose:
+// - Single reusable page for the recycler to manage pickup requests.
+// - The same component is used for 4 routes via the `mode` prop:
+//   - pending / accepted / collected / completed
+// - Loads all pickup requests, then filters them by status for the current mode.
+// - Includes search (by user name, request id, item name) and a modal with request details + actions.
 import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import PickupRequestCard from "../../components/pickup/PickupRequestCard";
 import PickupRequestDetails from "../../components/pickup/PickupRequestDetails";
+import completedBanner from "../../assets/banners/banner7.png";
 import {
   acceptPickupRequest,
   getAllPickupRequests,
@@ -11,6 +18,7 @@ import {
 } from "../../services/api";
 
 const RecyclerPickupsPage = ({ mode = "pending" }) => {
+  // UI state
   const [showModal, setShowModal] = useState(false);
   const [requests, setRequests] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -25,6 +33,7 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
   const validModes = ["pending", "accepted", "collected", "completed"];
   const safeMode = validModes.includes(mode) ? mode : "pending";
 
+  // Load all requests from backend, then filter them based on `safeMode`.
   const fetchRequests = async () => {
     try {
       setLoadingList(true);
@@ -93,10 +102,12 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
   };
 
   useEffect(() => {
+    // Reload list whenever the mode changes.
     fetchRequests();
   }, [safeMode]);
 
   useEffect(() => {
+    // When user selects a request, load full details for the modal.
     if (selectedId) {
       fetchRequestDetails(selectedId);
     }
@@ -106,20 +117,18 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
     // Validation: safe normalize search input
     const keyword = String(searchTerm || "").trim().toLowerCase();
 
-    // If search is empty, return original list
+    // If search is empty, return the unfiltered list
     if (!keyword) return requests;
 
     return requests.filter((item) => {
       const itemName = String(item?.itemName || "").toLowerCase();
-      const address = String(item?.address || "").toLowerCase();
-      const email = String(item?.email || "").toLowerCase();
-      const status = String(item?.status || "").toLowerCase();
+      const userName = String(item?.userName || "").toLowerCase();
+      const requestId = String(item?._id || "").toLowerCase();
 
       return (
         itemName.includes(keyword) ||
-        address.includes(keyword) ||
-        email.includes(keyword) ||
-        status.includes(keyword)
+        userName.includes(keyword) ||
+        requestId.includes(keyword)
       );
     });
   }, [requests, searchTerm]);
@@ -197,21 +206,18 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
 
   return (
     <main className="flex-1 bg-[#f5f7fb]">
-      <section className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] text-white">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
-          <p className="uppercase tracking-[0.25em] text-xs text-white/80 mb-3">
-            Recycler Dashboard
-          </p>
-          <h1 className="text-3xl md:text-5xl font-semibold mb-3">
-            Pickup Requests
-          </h1>
-          <p className="text-white/90 max-w-2xl text-sm md:text-base">
-            Manage all customer pickup requests, review request details, and track your
-            accepted collections.
-          </p>
-        </div>
-      </section>
+      {/* Only show the banner on the completed page */}
+      {safeMode === "completed" && (
+        <section className="-mt-8 -mx-4 sm:-mx-6 lg:-mx-8 overflow-hidden">
+          <img
+            src={completedBanner}
+            alt="Completed pickups banner"
+            className="w-full h-auto block"
+          />
+        </section>
+      )}
 
+      {/* Page content */}
       <section className="max-w-[1400px] mx-auto px-6 lg:px-8 py-10">
         <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
@@ -219,11 +225,12 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
             <p className="text-sm text-slate-500 mt-1">{pageDescription}</p>
           </div>
 
+          {/* Search box */}
           <div className="relative w-full lg:w-[320px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
             <input
               type="text"
-              placeholder="Search requests..."
+              placeholder="Search by user name, request ID, or item name..."
               value={searchTerm}
               onChange={(e) => {
                 // Validation: safely store input as string and limit excessive length
@@ -237,6 +244,7 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
 
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-4">
+            {/* List states: loading / empty / list */}
             {loadingList ? (
               <div className="rounded-3xl bg-white border border-slate-200 p-8 text-center text-slate-500">
                 Loading pickup requests...
@@ -265,6 +273,7 @@ const RecyclerPickupsPage = ({ mode = "pending" }) => {
       </section>
 
       {showModal && (
+        // Modal overlay
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
           onClick={() => {
