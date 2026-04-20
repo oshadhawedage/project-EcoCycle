@@ -2,14 +2,14 @@
 import PickupRequest from "../models/pickupRequestModel.js";
 import { sendStatusEmail } from "../services/emailService.js";
 import EwasteItem from "../models/EwasteItem.js";
-import User from "../models/User.model.js"; // ✅ ADD THIS
+import User from "../models/User.model.js"; 
 
-// 🔥 NEW IMPORTS
+
 import ImpactLog from "../models/ImpactLog.js";
 import Settings from "../models/Settings.js";
 
 
-// 🔥 helper function for CO2 settings
+// helper function for CO2 settings
 const getOrCreateSettings = async () => {
   let settings = await Settings.findOne();
   if (!settings) settings = await Settings.create({});
@@ -36,7 +36,7 @@ export const createRequest = async (req, res) => {
       return res.status(404).json({ message: "E-waste item not found" });
     }
 
-    // 🔥 Decide address
+    // Decide address
     // Decide pickup address
     let finalAddress = "";
 
@@ -62,7 +62,7 @@ export const createRequest = async (req, res) => {
     const request = await PickupRequest.create({
       userId,
       email: user.email,
-       userName: user.fullName, // ✅ ADD THIS
+       userName: user.fullName, 
       ewasteItemId: item._id,
       itemName: `${item.brand} ${item.deviceType}`,
       deviceType: item.deviceType,
@@ -162,7 +162,7 @@ export const acceptRequest = async (req, res) => {
 };
 
 
-// 🔥 UPDATE status (Admin/Recycler)
+// UPDATE status (Admin/Recycler)
 export const updateStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -177,11 +177,11 @@ export const updateStatus = async (req, res) => {
       return res.status(404).json({ message: "Not found" });
     }
 
-    // ✅ Update PickupRequest
+    // Update PickupRequest
     request.status = status;
     const updated = await request.save();
 
-    // 🔥 IMPORTANT: Sync EwasteItem
+    // IMPORTANT: Sync EwasteItem
     const item = await EwasteItem.findById(request.ewasteItemId);
 
     if (item) {
@@ -196,7 +196,7 @@ export const updateStatus = async (req, res) => {
       await item.save();
     }
 
-    // 🔥 IMPACT LOG (keep your logic)
+    // IMPACT LOG (keep your logic)
     if (status === "Completed") {
       const settings = await getOrCreateSettings();
       const factor = settings.co2FactorPerKg ?? 3;
@@ -227,7 +227,7 @@ export const updateStatus = async (req, res) => {
       });
     }
 
-    // 📧 Email
+    // Email
     await sendStatusEmail({
       to: updated.email,
       itemName: updated.itemName,
