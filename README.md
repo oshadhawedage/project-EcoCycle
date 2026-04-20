@@ -105,7 +105,7 @@ npm install
 .env
 
 PORT=5050
-MONGO_URI=mongodb+srv://meghapromotacc_db_user:0F4DLtPOjgg0tZDw@cluster0.e138ci0.mongodb.net/EcoTest?appName=Cluster0
+MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 JWT_EXPIRES=7d
 
@@ -115,17 +115,17 @@ CLIENT_URL=http://localhost:5173
 # Email (Gmail example)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=ewasteplatform01@gmail.com
-EMAIL_PASS=vaxqwarmljiatdvo
-EMAIL_FROM="E-Waste Platform <ewasteplatform01@gmail.com>"
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_app_password
+EMAIL_FROM="E-Waste Platform <your_email@gmail.com>"
 
 OTP_EXPIRES_MIN=10
 
 # Admin Registration Key (CHANGE THIS IN PRODUCTION!)
-ADMIN_REGISTER_KEY=SecureAdminKey2024!
+ADMIN_REGISTER_KEY=your_admin_secret_key
 
 #public holiay api key
-CALENDARIFIC_API_KEY=Uz6UeKdpeILDllnFfbr4LxiIZMyBzPji
+CALENDARIFIC_API_KEY=your_api_key
 ```
 
 ### Run Backend
