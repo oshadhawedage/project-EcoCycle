@@ -1,4 +1,11 @@
 // CreatePickupRequestButton.jsx
+// Purpose:
+// - Renders the "Create Pickup Request" CTA for an e-waste item.
+// - Opens `CreatePickupRequestModal` to collect pickup details and submit the request.
+//
+// Props:
+// - item: the e-waste item object (must include `_id` and a `status` field)
+// - onCreated: optional callback invoked after a successful pickup request creation
 import React, { useState } from "react";
 import { Truck } from "lucide-react"; //truck icon from lucide-react
 import CreatePickupRequestModal from "./CreatePickupRequestModal"; // Modal component for creating pickup requests
@@ -9,8 +16,9 @@ const CreatePickupRequestButton = ({ item, onCreated }) => {
   //State to control modal open/close
   const [open, setOpen] = useState(false);
 
-   // Disable button if item is not available
-  // (means pickup already requested or processed)
+  // Business rule:
+  // - Only "available" items can create a pickup request.
+  // - Any other item status implies a pickup is already requested/processed.
   const isDisabled = item?.status && item.status !== "available";
 
   return (

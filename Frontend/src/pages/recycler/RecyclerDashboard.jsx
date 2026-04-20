@@ -1,4 +1,9 @@
 // RecyclerDashboard.jsx
+// Purpose:
+// - Main dashboard for recyclers.
+// - Shows pickup request counts (pending/accepted/collected/completed).
+// - Loads recycler analytics (overview + monthly trend) and renders a chart.
+// - Cards navigate to the corresponding pickups pages.
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ClipboardList,
@@ -14,7 +19,7 @@ import {
   getOverview,
   getMonthlyTrend,
 } from "../../services/api";
-import headerImage from "../../assets/RecyclerHeader.png";
+import dashboardBanner from "../../assets/banners/banner6.png";
 import { useNavigate } from "react-router-dom";
 import {
   ResponsiveContainer,
@@ -29,17 +34,17 @@ import {
 const RecyclerDashboard = () => {
   const navigate = useNavigate();
 
-  // ================= EXISTING DASHBOARD STATE =================
+  // Pickup request lists used for counts
   const [allRequests, setAllRequests] = useState([]);
   const [acceptedRequests, setAcceptedRequests] = useState([]);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  // ================= NEW ANALYTICS STATE =================
+  // Analytics data (overview cards + chart)
   const [overview, setOverview] = useState(null);
   const [monthlyTrend, setMonthlyTrend] = useState([]);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
-  // ================= FETCH PICKUP REQUEST STATS =================
+  // Load pickup requests so we can calculate counts for the cards
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
@@ -68,7 +73,7 @@ const RecyclerDashboard = () => {
     fetchDashboardStats();
   }, []);
 
-  // ================= FETCH ANALYTICS DATA =================
+  // Load analytics for the recycler impact section
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -102,13 +107,13 @@ const RecyclerDashboard = () => {
     fetchAnalytics();
   }, []);
 
-  // ================= SAFE NUMBER FORMATTER =================
+  // Helper to safely format numeric values for display
   const safeNumber = (value, digits = 1) => {
     const number = Number(value);
     return Number.isFinite(number) ? number.toFixed(digits) : Number(0).toFixed(digits);
   };
 
-  // ================= EXISTING SUMMARY VALUES =================
+  // Calculate pickup counts by status
   const stats = useMemo(() => {
     const pendingCount = allRequests.filter(
       (item) => item?.status === "Pending"
@@ -147,16 +152,16 @@ const RecyclerDashboard = () => {
   return (
     <main className="flex-1 bg-[#f5f7fb]">
       {/* ================= HERO SECTION ================= */}
-      <section className="rounded-3xl overflow-hidden">
+      <section className="-mt-8 -mx-4 sm:-mx-6 lg:-mx-8 overflow-hidden">
         <img
-          src={headerImage}
-          alt="Recycler Header"
-          className="w-full h-[220px] object-cover"
+          src={dashboardBanner}
+          alt="Recycler dashboard banner"
+          className="w-full h-auto block"
         />
       </section>
 
       <section className="max-w-[1400px] mx-auto py-10 space-y-8">
-        {/* ================= EXISTING SUMMARY CARDS ================= */}
+        {/* Top cards: quick navigation + status counts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
           <div
             onClick={() => navigate("/pickups")}
@@ -219,7 +224,7 @@ const RecyclerDashboard = () => {
           </div>
         </div>
 
-        {/* ================= EXISTING QUICK INFO CARDS ================= */}
+        {/* Info cards: short descriptions */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-800 mb-2">
@@ -258,7 +263,7 @@ const RecyclerDashboard = () => {
           </div>
         </div>
 
-        {/* ================= NEW: RECYCLER ANALYTICS HEADER ================= */}
+        {/* Analytics section header */}
         <div>
           <h2 className="text-2xl font-semibold text-slate-800">
             Recycler Analytics
@@ -268,7 +273,7 @@ const RecyclerDashboard = () => {
           </p>
         </div>
 
-        {/* ================= NEW: ANALYTICS SUMMARY CARDS ================= */}
+        {/* Analytics summary cards */}
         {loadingAnalytics ? (
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm text-slate-500">
             Loading analytics...
@@ -325,7 +330,7 @@ const RecyclerDashboard = () => {
           </div>
         )}
 
-        {/* ================= NEW: MONTHLY TREND CHART ================= */}
+        {/* Monthly trend chart */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <div className="mb-5">
             <h3 className="text-xl font-semibold text-slate-800">
@@ -362,7 +367,7 @@ const RecyclerDashboard = () => {
           )}
         </div>
 
-        {/* ================= OPTIONAL: RECENT ANALYTICS ACTIVITY ================= */}
+        {/* Recent activity list (from overview.recentLogs) */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <div className="mb-5">
             <h3 className="text-xl font-semibold text-slate-800">

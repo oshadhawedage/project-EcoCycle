@@ -1,4 +1,15 @@
 //PickupRequestDetails.jsx
+// Purpose:
+// - Shows the full details for a selected pickup request.
+// - Provides recycler actions (Accept / Mark Collected / Mark Completed) depending on `mode`.
+// - Includes a "View Location" button that opens Google Maps directions.
+//
+// Props:
+// - request: selected pickup request object (or null)
+// - onAccept: callback to accept a request
+// - onUpdateStatus: callback to update status (Collected/Completed)
+// - accepting/updating: loading flags to disable actions
+// - mode: which page is showing (pending/accepted/collected/completed)
 import React, { useMemo } from "react";
 import {CalendarDays, Clock3, Mail, MapPin, Package, CheckCircle2, Truck, UserRound, Hash, Wrench, Cpu, Weight, Recycle
 } from "lucide-react";
@@ -12,6 +23,8 @@ const PickupRequestDetails = ({
   updating,
   mode,
 }) => {
+  // Compute what the "next" allowed status values are.
+  // (Currently used as a convenience/validation; actions below are also guarded by `mode` and `request.status`.)
   const nextStatusOptions = useMemo(() => {
     if (!request) return [];
     if (request.status === "Accepted") return ["Collected", "Completed"];
@@ -27,7 +40,9 @@ const PickupRequestDetails = ({
     );
   }
 
-  // Function to open Google Maps with the request address
+  // Open Google Maps with directions to the pickup address.
+  // - If location permission is granted, use the user's current position as origin.
+  // - Otherwise, open a simple search for the destination address.
   const handleOpenMap = () => {
   const destination = encodeURIComponent(request.address);
 
@@ -77,6 +92,7 @@ const PickupRequestDetails = ({
 
   return (
     <div className="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+      {/* Header section */}
       <div className="bg-gradient-to-r from-[#0f55a7] to-[#4db848] px-6 py-5 text-white">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -89,6 +105,7 @@ const PickupRequestDetails = ({
 
       <div className="p-6 md:p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Left: request + user + item details */}
           <div className="rounded-2xl bg-slate-50 p-5 border border-slate-200">
             <h3 className="text-sm uppercase tracking-widest text-slate-500 font-semibold mb-4">
               Request Information
@@ -170,6 +187,7 @@ const PickupRequestDetails = ({
             </div>
           </div>
 
+          {/* Right: recycler actions based on the current mode/status */}
           <div className="rounded-2xl bg-slate-50 p-5 border border-slate-200">
             <h3 className="text-sm uppercase tracking-widest text-slate-500 font-semibold mb-4">
               Recycler Actions

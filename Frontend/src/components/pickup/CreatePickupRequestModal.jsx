@@ -1,4 +1,14 @@
 // CreatePickupRequestModal.jsx
+// Purpose:
+// - Modal dialog used by users to create a new pickup request for an e-waste item.
+// - Collects quantity, pickup address, and preferred pickup date.
+// - Submits the request to the backend via `createPickupRequest`.
+//
+// Props:
+// - item: the selected e-waste item (must contain `_id` and display fields)
+// - isOpen: controls whether the modal is rendered
+// - onClose: called when the modal should be dismissed
+// - onSuccess: optional callback fired with the created request (to refresh parent UI)
 import React, { useState } from "react";
 import { X, Truck, CalendarDays, MapPin, Package } from "lucide-react";
 import { createPickupRequest } from "../../services/api";
@@ -13,6 +23,8 @@ const CreatePickupRequestModal = ({ item, isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Guard:
+  // - Do not render anything unless the modal is open AND a valid item is provided.
   if (!isOpen || !item) return null;
 
   const handleChange = (e) => {
@@ -29,6 +41,8 @@ const CreatePickupRequestModal = ({ item, isOpen, onClose, onSuccess }) => {
     try {
       setLoading(true);
 
+      // Payload sent to backend.
+      // Note: quantity is cast to Number to ensure consistent type.
       const payload = {
         ewasteItemId: item._id,
         quantity: Number(formData.quantity),
@@ -38,6 +52,7 @@ const CreatePickupRequestModal = ({ item, isOpen, onClose, onSuccess }) => {
 
       const response = await createPickupRequest(payload);
 
+      // Notify parent (if provided), then reset and close.
       if (onSuccess) onSuccess(response.data);
       onClose();
       setFormData({
