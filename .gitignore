@@ -8,8 +8,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment variables
-.env
-.env.local
 .env.*.local
 !.env.example
 
@@ -22,5 +20,5 @@ build/
 .cache/
 
 # IDE / OS
-.vscode/
 .DS_Store
+config.bat
